@@ -239,8 +239,7 @@ void drawWorld(){
     glFrustum(-4,4,-1,1,0.9,40);
 
     glMatrixMode(GL_MODELVIEW);
-    //glViewport(0,0,1800,900);
-    glLoadIdentity();
+    glViewport(0,0,1200,600);
     //gluLookAt(PosXGlobalCamera, PosYGlobalCamera,PosZGlobalCamera, //posição da câmera
     //          PosXGlobalCamera, PosYApontaCamera,PosZApontaCamera,//Posição inicial da camera, //para onde a câmera olha
     //          0, 0, 1); //para onde o topo da câmera aponta
@@ -359,6 +358,7 @@ void drawWorld(){
         glEnd();
         glBindTexture(GL_TEXTURE_2D, 0);
     }else if (Temporizador > 150){
+        glViewport(700,100,850,500);
         glColor3f(1,0,0);
         glBindTexture(GL_TEXTURE_2D, textID_vel[int(MyCar.getVelocidade())]);
         glBegin(GL_QUADS);
