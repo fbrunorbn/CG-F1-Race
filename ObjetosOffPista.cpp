@@ -38,8 +38,8 @@ class ObjetosOffPista{
 
         void MoverFaixaChegada(){
             this->PosY -= this->velocidade;
-            if (PosY <= 0.0){
-                PosY += 600.0;
+            if (PosY <= -40.0){
+                PosY += 640.0;
             }
         }
 

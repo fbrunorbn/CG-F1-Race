@@ -12,6 +12,7 @@
 #include "ObjetosOffPista.cpp"
 #include "EnemyCar.cpp"
 #include "PrimaryCar.cpp"
+#include "StaticObjetos.cpp"
 #include <vector>
 #include <cstdlib>
 #include <math.h>
@@ -24,7 +25,7 @@
 
 using namespace std;
 
-int A[5] = {0,0,0,0,0};//Controle de movimentacao do teclado
+int Pressed_Key[5] = {0,0,0,0,0};//Controle de movimentacao do teclado
 float VetorDir[5];//Vetor de direcao dos carros inimigos
 float PosXGlobalCamera = 30.0;//Posição inicial da camera
 float PosYGlobalCamera = 9.0;
@@ -33,18 +34,19 @@ float PosYApontaCamera = 40.0;//Posição inicial da camera
 float PosZApontaCamera = 10.0;//Posição inicial da camera
 int QtdCarrosInimigos = 5; //Controla a qtd de carros inimigos
 int RotacaoPneu = 0; //Serve para girar o pneu quando o carro anda
-int Temporizador = 0;
+int Temporizador = 0; //Serve para os estados de 1-2-3-GO
 float Chegada = 0;
 float Colisao = 0;
 float RotacaoColisao = 0;
 float TempoColisao = 0;
-float X = 50;
-float Y = 50;
+float TamTextX = 50;
+float TamTextY = 50;
 float frustrum_min = 0.9;
 GLuint textID[13];
 GLuint textID_vel[241];
 
 PrimaryCar MyCar = PrimaryCar(32,11.5,10.11,0.0);
+StaticObjetos ObjetosEstaticos = StaticObjetos();
 vector <FaixaCentral> FaixasCentrais;
 vector <EnemyCar> EnemyCars;
 vector <ObjetosOffPista> Arvores;
@@ -71,11 +73,9 @@ void carregaTextura(GLuint tex_id, string filePath){
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPLACE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPLACE);
 
-        
-
         stbi_image_free(imgData);
     }else{
-        //cout << "Erro: Nao foi possivel carregar a textura! " << filePath.c_str() << endl;
+        cout << "Erro: Nao foi possivel carregar a textura! " << filePath.c_str() << endl;
     }
 
     
@@ -93,22 +93,15 @@ void criarFaixasCentrais(){
 
 //Instanciando as arvores em quantidade fixa
 void criarArvores(){
-    for (int i = -60; i < 40 ; i+= 3){
-        int rand_aux = rand() % 20;
-        int x = 0;
-        if (rand_aux <= 7){
-            x = i + 3;
-        }if (rand_aux >= 8 && rand_aux <=14){
-            x = i;
-        }else{
-            x = i - 3;
-        }
-        for (int ladoEsq = -13; ladoEsq <= 22; ladoEsq += 5){
-            ObjetosOffPista Arvore = ObjetosOffPista(ladoEsq,x,11);
+    for (int i = -40; i < 40 ; i+= 3){        
+        for (int ladoEsq = -30; ladoEsq <= 22; ladoEsq += 4){
+            int tree_aleat_pos = rand() % 5;
+            ObjetosOffPista Arvore = ObjetosOffPista(ladoEsq,tree_aleat_pos + i,11);
             Arvores.push_back(Arvore);
         }
-        for (int ladoDir = 38; ladoDir <= 60; ladoDir += 5){
-            ObjetosOffPista Arvore = ObjetosOffPista(ladoDir,x,11);
+        for (int ladoDir = 38; ladoDir <= 80; ladoDir += 4){
+            int tree_aleat_pos = rand() % 5;
+            ObjetosOffPista Arvore = ObjetosOffPista(ladoDir,tree_aleat_pos + i,11);
             Arvores.push_back(Arvore);
         }
     }
@@ -176,20 +169,20 @@ void initializeGL(){
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glGenTextures(10, textID);//Gerando na memoria a textura com seu id
-    carregaTextura(textID[0],"images/PressStart.jpeg");
-    carregaTextura(textID[1],"images/1.png");
-    carregaTextura(textID[2],"images/2.png");
-    carregaTextura(textID[3],"images/3.png");
-    carregaTextura(textID[4],"images/Go.png");
-    carregaTextura(textID[5],"images/YouLose.jpg");
-    carregaTextura(textID[6],"images/YouWin.png");
-    carregaTextura(textID[7],"images/Grama.jpg");
-    carregaTextura(textID[8],"images/Copa.jpg");
-    carregaTextura(textID[9],"images/Tronco.jpg");
+    carregaTextura(textID[0],"sprites/PressStart.jpeg");
+    carregaTextura(textID[1],"sprites/1.png");
+    carregaTextura(textID[2],"sprites/2.png");
+    carregaTextura(textID[3],"sprites/3.png");
+    carregaTextura(textID[4],"sprites/Go.png");
+    carregaTextura(textID[5],"sprites/YouLose.jpg");
+    carregaTextura(textID[6],"sprites/YouWin.png");
+    carregaTextura(textID[7],"sprites/Grama.jpg");
+    carregaTextura(textID[8],"sprites/Copa.jpg");
+    carregaTextura(textID[9],"sprites/Tronco.jpg");
 
     glGenTextures(241, textID_vel);//Gerando na memoria a textura da velocidade com seu id
     for (int i = 0; i <= 240; i++){
-        string path = "images/sprites_velocidades/";
+        string path = "sprites/sprites_velocimetro/";
         string convertion = to_string(i);
         string format = ".png";
         path = path + convertion + format;
@@ -202,52 +195,6 @@ void initializeGL(){
     criarNuvem();
     criarEnemyCar();
     criarLargada();
-}
-
-//Desenhando os elementos estáticos, que no caso é o piso, chão, linhas laterais
-void EstaticObjects(){
-    //Chao        
-    glPushMatrix();
-    glBindTexture(GL_TEXTURE_2D, textID[7]);
-    glColor3f(0,0.29,0.20);
-    glBegin(GL_QUADS);
-        glTexCoord2f(0.0,0.0);   glVertex3f(-60,-40,10);
-        glTexCoord2f(int(X),0.0);  glVertex3f(120,-40,10);
-        glTexCoord2f(int(X),int(Y)); glVertex3f(120,60,10);
-        glTexCoord2f(0.0,int(Y));  glVertex3f(-60,60,10);
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glPopMatrix();
-    //Pista
-    glPushMatrix();
-    glBegin(GL_QUADS);
-    glColor3f(0,0,0);
-        glVertex3f(25,-40,10.03);
-        glVertex3f(35,-40,10.03);
-        glVertex3f(35,60,10.03);
-        glVertex3f(25,60,10.03);
-    glEnd(); 
-    glPopMatrix();
-    //Faixa Esq 
-    glPushMatrix();
-    glBegin(GL_QUADS);
-    glColor3f(1,1,1);
-        glVertex3f(25,-40,10.05);
-        glVertex3f(25.5,-40,10.05);
-        glVertex3f(25.5,60,10.05);
-        glVertex3f(25,60,10.05);
-    glEnd(); 
-    glPopMatrix();
-    //Faixa Dir 
-    glPushMatrix();
-    glBegin(GL_QUADS);
-    glColor3f(1,1,1);
-        glVertex3f(34.5,-40,10.05);
-        glVertex3f(35,-40,10.05);
-        glVertex3f(35,60,10.05);
-        glVertex3f(34.5,60,10.05);
-    glEnd(); 
-    glPopMatrix();
 }
 
 //Funcao para desenhar as faixas centrais na posicao 0,0,0
@@ -288,16 +235,21 @@ void drawWorld(){
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-4,4,-1,1,frustrum_min,40);
+    //glFrustum(-4,4,-1,1,frustrum_min,40);
+    glFrustum(-4,4,-1,1,0.9,40);
 
     glMatrixMode(GL_MODELVIEW);
-    glViewport(0,0,1800,900);
+    //glViewport(0,0,1800,900);
     glLoadIdentity();
-    gluLookAt(PosXGlobalCamera, PosYGlobalCamera,PosZGlobalCamera, //posição da câmera
-              PosXGlobalCamera, PosYApontaCamera,PosZApontaCamera,//Posição inicial da camera, //para onde a câmera olha
+    //gluLookAt(PosXGlobalCamera, PosYGlobalCamera,PosZGlobalCamera, //posição da câmera
+    //          PosXGlobalCamera, PosYApontaCamera,PosZApontaCamera,//Posição inicial da camera, //para onde a câmera olha
+    //          0, 0, 1); //para onde o topo da câmera aponta
+    glLoadIdentity();
+    gluLookAt(PosXGlobalCamera, 9,12, //posição da câmera
+              PosXGlobalCamera, PosYApontaCamera,10, //para onde a câmera olha
               0, 0, 1); //para onde o topo da câmera aponta
 
-    EstaticObjects();
+    ObjetosEstaticos.EstaticObjects(TamTextX,TamTextY,textID[7]);
     
     
     glPushMatrix();
@@ -443,39 +395,34 @@ void ocioso(int v){
         }
         if (Temporizador == -1){
             PosXGlobalCamera = 30.0;
-            //cout << "Teste: W " << A[0] << " , A " << A[1] << " , S " << A[2] << " , D " << A[3] << ", Qtd Enemy " << QtdCarrosInimigos << ", Velocidade " << MyCar.getVelocidade() << endl; 
             glutTimerFunc(1000.0/FPS, ocioso, 0);
             glutPostRedisplay();
         }
         if (Temporizador == -2){
             PosXGlobalCamera = 30.0;
-            //cout << "Teste: W " << A[0] << " , A " << A[1] << " , S " << A[2] << " , D " << A[3] << ", Qtd Enemy " << QtdCarrosInimigos << ", Velocidade " << MyCar.getVelocidade() << endl; 
             glutTimerFunc(1000.0/FPS, ocioso, 0);
             glutPostRedisplay();
         }
     }
     if (Temporizador == 0){
-        //cout << "Teste: W " << A[0] << " , A " << A[1] << " , S " << A[2] << " , D " << A[3] << ", Qtd Enemy " << QtdCarrosInimigos << ", Velocidade " << MyCar.getVelocidade() << endl; 
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
     }else if (Temporizador > 1 && Temporizador <= 110){
-        //cout << "Teste: W " << A[0] << " , A " << A[1] << " , S " << A[2] << " , D " << A[3] << ", Qtd Enemy " << QtdCarrosInimigos << ", Velocidade " << MyCar.getVelocidade() << endl;
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
     }else if (Temporizador > 110 && Temporizador <=150){
         PosXGlobalCamera += (MyCar.getPosX() - PosXGlobalCamera)/10;
-        //cout << "Teste: W " << A[0] << " , A " << A[1] << " , S " << A[2] << " , D " << A[3] << ", Qtd Enemy " << QtdCarrosInimigos << ", Velocidade " << MyCar.getVelocidade() << endl;
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
     }else if (Temporizador != -1 && Temporizador != -2){
         if(MyCar.getVelocidade() > 0){
-            X += 0.5;
-            Y += 0.5;
-            if (X >= 70){
-                X = 50;
+            TamTextX += 0.5;
+            TamTextY += 0.5;
+            if (TamTextX >= 70){
+                TamTextX = 50;
             }
-            if (Y >= 70){
-                Y = 50;
+            if (TamTextY >= 70){
+                TamTextY = 50;
             }
         }
         
@@ -485,25 +432,25 @@ void ocioso(int v){
         //Mantendo a posição da camera de acordo com a posição do meu carro
         PosXGlobalCamera = MyCar.getPosX() + 0.5;
 
-        if (A[0] == 1){
+        if (Pressed_Key[0] == 1){
             //W
             MyCar.DefineVelo(MyCar.getVelocidade() + 1.3);
         }
-        if (A[1] == 1){
+        if (Pressed_Key[1] == 1){
             //A
             MyCar.setPosX(MyCar.getPosX() - 0.07);
             MyCar.DefineVelo(MyCar.getVelocidade() - 0.3);
         }
-        if (A[2] == 1){
+        if (Pressed_Key[2] == 1){
             //S
             MyCar.DefineVelo(MyCar.getVelocidade() - 4.0);
         }
-        if (A[3] == 1){
+        if (Pressed_Key[3] == 1){
             //D
             MyCar.setPosX(MyCar.getPosX() + 0.07);
             MyCar.DefineVelo(MyCar.getVelocidade() - 0.3);
         }
-        if (A[4] == 1){
+        if (Pressed_Key[4] == 1){
             //D
             if (PosYApontaCamera > 0){
                 PosYApontaCamera = PosYApontaCamera*(-1.0);
@@ -514,7 +461,7 @@ void ocioso(int v){
                 PosZApontaCamera = 8;
             }
         }
-        if (A[4] == 0){
+        if (Pressed_Key[4] == 0){
             //D
             if (PosYApontaCamera < 0){
                 PosYApontaCamera = PosYApontaCamera*(-1.0);
@@ -557,10 +504,10 @@ void ocioso(int v){
         }
 
         //Defini os limites do Meu Carro, para n sair da pista, ter velocidade negativa ou acima da velocidade máxima
-        if (MyCar.getPosX() > 33.8){
-            MyCar.setPosX(33.8);
-        }else if(MyCar.getPosX() < 25.2){
-            MyCar.setPosX(25.2);
+        if (MyCar.getPosX() > 33.6){
+            MyCar.setPosX(33.6);
+        }else if(MyCar.getPosX() < 25.4){
+            MyCar.setPosX(25.4);
         }else if(MyCar.getVelocidade() <= 0){
             MyCar.DefineVelo(0.0);
         }else if(MyCar.getVelocidade() >= MaxVelocidade){
@@ -641,10 +588,6 @@ void ocioso(int v){
                 TempoColisao = 0;
             }
         }
-        
-
-        //Testando o press 2 teclas
-        //cout << "Teste: W " << A[0] << " , A " << A[1] << " , S " << A[2] << " , D " << A[3] << ", Qtd Enemy " << QtdCarrosInimigos << ", Coliscao " << Colisao << ", Velocidade " << MyCar.getVelocidade() << endl;
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
     }
@@ -653,19 +596,19 @@ void ocioso(int v){
 //Função para tratamento de teclado
 void Key(unsigned char key, int x, int y){
     if (key == 'w' || key == 'W'){
-        A[0] = 1;
+        Pressed_Key[0] = 1;
     }
     if (key == 'a' || key == 'A'){
-        A[1] = 1;
+        Pressed_Key[1] = 1;
     }
     if (key == 's' || key == 'S'){
-        A[2] = 1;
+        Pressed_Key[2] = 1;
     }
     if (key == 'd' || key == 'D'){
-        A[3] = 1;
+        Pressed_Key[3] = 1;
     }
     if (key == 'r' || key == 'R'){
-        A[4] = 1;
+        Pressed_Key[4] = 1;
     }
     if (key == 'm' || key == 'M'){
         Temporizador = 1;
@@ -674,19 +617,19 @@ void Key(unsigned char key, int x, int y){
 
 void KeyUp(unsigned char key, int x, int y){
     if (key == 'w' || key == 'W'){
-        A[0] = 0;
+        Pressed_Key[0] = 0;
     }
     if (key == 'a' || key == 'A'){
-        A[1] = 0;
+        Pressed_Key[1] = 0;
     }
     if (key == 's' || key == 'S'){
-        A[2] = 0;
+        Pressed_Key[2] = 0;
     }
     if (key == 'd' || key == 'D'){
-        A[3] = 0;
+        Pressed_Key[3] = 0;
     }
     if (key == 'r' || key == 'R'){
-        A[4] = 0;
+        Pressed_Key[4] = 0;
     }
 }
 
@@ -695,7 +638,7 @@ int main(int argc, char **argv){
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(50,50);
-    glutInitWindowSize(1800,900);
+    glutInitWindowSize(1200,600);
     glutCreateWindow("F1 Race");
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
