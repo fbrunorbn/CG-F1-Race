@@ -66,6 +66,9 @@ class EnemyCar{
         void DrawAllCar(float RotacaoPneu){
             DrawCars Car = DrawCars(RotacaoPneu);
             Car.drawCar(0,1,0);
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            Car.drawCar(0,0,0);
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
             Car.drawPneus(-0.15,0.352,0.115);
             Car.drawPneus(-0.15,0.122,0.115);
         }

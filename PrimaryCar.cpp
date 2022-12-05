@@ -22,6 +22,9 @@ class PrimaryCar{
         //Funções para definir a velocidade realtiva do carro inimigo
         void DefineVelo(float velocidade){
             this->Velocidade = velocidade;
+            if (this->Velocidade > 270){
+                this->Velocidade = 270.0;
+            }
         }
 
         float getPosX(){
@@ -54,7 +57,11 @@ class PrimaryCar{
 
         void DrawAllCar(float RotacaoPneu){
             DrawCars Car = DrawCars(RotacaoPneu);
+            
             Car.drawCar(1,0,0);
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            Car.drawCar(0,0,0);
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
             Car.drawPneus(-0.15,0.352,0.115);
             Car.drawPneus(-0.15,0.122,0.115);
         }

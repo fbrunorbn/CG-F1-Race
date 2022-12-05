@@ -9,7 +9,11 @@
 #include <math.h>
 #include <iostream>
 #include "FaixaCentral.cpp"
-#include "ObjetosOffPista.cpp"
+#include "Tree.cpp"
+#include "FaixaLargada.cpp"
+#include "Post.cpp"
+#include "Clouds.cpp"
+#include "SemaforoLargada.cpp"
 #include "EnemyCar.cpp"
 #include "PrimaryCar.cpp"
 #include "StaticObjetos.cpp"
@@ -20,20 +24,22 @@
 
 #define FPS 30 //Limite de FPS no jogo
 #define MaxFaixaCentral 20 //Quantidade máxima de faixas centrais
-#define MaxVelocidade 240 //Velocidade máxima atingida pelo carro
 #define MovimentacaoNuvem  0.5; //Serve para a translação das nuvens
 
 using namespace std;
 
+int MaxVelocidade = 240;
 int Pressed_Key[5] = {0,0,0,0,0};//Controle de movimentacao do teclado
 float VetorDir[5];//Vetor de direcao dos carros inimigos
 float PosXGlobalCamera = 30.0;//Posição inicial da camera
 float PosYGlobalCamera = 9.0;
 float PosZGlobalCamera = 12.0;
+float PosXApontaCamera = 30.0;
 float PosYApontaCamera = 40.0;//Posição inicial da camera
 float PosZApontaCamera = 10.0;//Posição inicial da camera
 int QtdCarrosInimigos = 5; //Controla a qtd de carros inimigos
 int RotacaoPneu = 0; //Serve para girar o pneu quando o carro anda
+float RotacaoSemaforo = 0.0;
 int Temporizador = 0; //Serve para os estados de 1-2-3-GO
 float Chegada = 0;
 float Colisao = 0;
@@ -42,17 +48,20 @@ float TempoColisao = 0;
 float TamTextX = 50;
 float TamTextY = 50;
 float frustrum_min = 0.9;
-GLuint textID[13];
-GLuint textID_vel[241];
+int Nitro = 3;
+int TempoNitro = 0;
+GLuint textID[15];
+GLuint textID_vel[271];
 
 PrimaryCar MyCar = PrimaryCar(32,11.5,10.11,0.0);
 StaticObjetos ObjetosEstaticos = StaticObjetos();
-vector <FaixaCentral> FaixasCentrais;
-vector <EnemyCar> EnemyCars;
-vector <ObjetosOffPista> Arvores;
-vector <ObjetosOffPista> Postes;
-vector <ObjetosOffPista> Nuvens;
-vector <ObjetosOffPista> FaixasLargada;
+SemaforoLargada Semaphore = SemaforoLargada(30,15,13);
+vector <FaixaCentral> VecFaixasCentrais;
+vector <EnemyCar> VecEnemyCars;
+vector <Tree> VecArvores;
+vector <Post> VecPostes;
+vector <Clouds> VecNuvens;
+vector <FaixaLargada> VecFaixasLargada;
 
 //Carregar as Texturas
 void carregaTextura(GLuint tex_id, string filePath){
@@ -86,7 +95,7 @@ void criarFaixasCentrais(){
     float distY = 40.0;
     for (int i = -40; i<MaxFaixaCentral; i++){
         FaixaCentral Faixa = FaixaCentral(30.0,distY,10.05);
-        FaixasCentrais.push_back(Faixa);
+        VecFaixasCentrais.push_back(Faixa);
         distY -= 4.0;
     }  
 }
@@ -96,13 +105,13 @@ void criarArvores(){
     for (int i = -40; i < 40 ; i+= 3){        
         for (int ladoEsq = -30; ladoEsq <= 22; ladoEsq += 4){
             int tree_aleat_pos = rand() % 5;
-            ObjetosOffPista Arvore = ObjetosOffPista(ladoEsq,tree_aleat_pos + i,11);
-            Arvores.push_back(Arvore);
+            Tree Arvore = Tree(ladoEsq,tree_aleat_pos + i,11);
+            VecArvores.push_back(Arvore);
         }
         for (int ladoDir = 38; ladoDir <= 80; ladoDir += 4){
             int tree_aleat_pos = rand() % 5;
-            ObjetosOffPista Arvore = ObjetosOffPista(ladoDir,tree_aleat_pos + i,11);
-            Arvores.push_back(Arvore);
+            Tree Arvore = Tree(ladoDir,tree_aleat_pos + i,11);
+            VecArvores.push_back(Arvore);
         }
     }
     
@@ -111,8 +120,8 @@ void criarArvores(){
 //Instanciando as postes em quantidade fixa
 void criarPoste(){
     for (int i = -30; i <= 40 ; i+= 11){
-        ObjetosOffPista Poste = ObjetosOffPista(24,i,11);
-        Postes.push_back(Poste);
+        Post Poste = Post(24,i,11);
+        VecPostes.push_back(Poste);
     }
 }
 
@@ -120,7 +129,7 @@ void criarPoste(){
 void criarEnemyCar(){
     float distY = 12.5;
     for (int i = 1; i <= QtdCarrosInimigos; i++){
-        distY += i/2;
+        distY += i/3;
         int x;
         if ((i%2)==0){
             x = 32.0;
@@ -131,7 +140,7 @@ void criarEnemyCar(){
         float rand_aux = rand() % 55;
         rand_aux += 180;
         Car.setVeloMax(rand_aux);
-        EnemyCars.push_back(Car);
+        VecEnemyCars.push_back(Car);
 
         //Velocidade com que os carros inimigos se movem continuamente para esquerda ou direita
         rand_aux = rand() % 2;//Gerar 1 ou 2
@@ -145,18 +154,24 @@ void criarEnemyCar(){
 
 //Instanciando as nuvens em quantidade fixa
 void criarNuvem(){
-    for (int i = 0; i <= 40; i++){
-        int x = (rand() % 300) - 20;
-        int z = (rand() % 20) + 11;
-        ObjetosOffPista Nuvem = ObjetosOffPista(x,45,z);
-        Nuvens.push_back(Nuvem);
+    for (int i = 0; i <= 20; i++){
+        int x = i *24;
+        int z = 0;
+        if(i%2==0){
+            z = (rand() % 35) + 11;
+        }else{
+            z = rand() % 35;
+        }
+        
+        Clouds Nuvem = Clouds(x,60,z,textID[10]);
+        VecNuvens.push_back(Nuvem);
     }
 }
 
 void criarLargada(){
     for (int i = 0; i < 1; i++){
-        ObjetosOffPista FaixaLargada = ObjetosOffPista(25,15,10.3);
-        FaixasLargada.push_back(FaixaLargada);
+        FaixaLargada FaixaLargadas = FaixaLargada(25,16.5,10.3);
+        VecFaixasLargada.push_back(FaixaLargadas);
     }
 }
 
@@ -168,7 +183,7 @@ void initializeGL(){
 
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glGenTextures(10, textID);//Gerando na memoria a textura com seu id
+    glGenTextures(15, textID);//Gerando na memoria a textura com seu id
     carregaTextura(textID[0],"sprites/PressStart.jpeg");
     carregaTextura(textID[1],"sprites/1.png");
     carregaTextura(textID[2],"sprites/2.png");
@@ -179,9 +194,15 @@ void initializeGL(){
     carregaTextura(textID[7],"sprites/Grama.jpg");
     carregaTextura(textID[8],"sprites/Copa.jpg");
     carregaTextura(textID[9],"sprites/Tronco.jpg");
+    carregaTextura(textID[10],"sprites/Nuvem.png");
+    carregaTextura(textID[11],"sprites/Nitro-3.png");
+    carregaTextura(textID[12],"sprites/Nitro-2.png");
+    carregaTextura(textID[13],"sprites/Nitro-1.png");
+    carregaTextura(textID[14],"sprites/Nitro-0.png");
 
-    glGenTextures(241, textID_vel);//Gerando na memoria a textura da velocidade com seu id
-    for (int i = 0; i <= 240; i++){
+
+    glGenTextures(271, textID_vel);//Gerando na memoria a textura da velocidade com seu id
+    for (int i = 0; i <= 270; i++){
         string path = "sprites/sprites_velocimetro/";
         string convertion = to_string(i);
         string format = ".png";
@@ -201,9 +222,9 @@ void initializeGL(){
 void drawFaixaCentral(){
     for (int i = 0; i < MaxFaixaCentral; i++){
         glPushMatrix();
-        float x = FaixasCentrais[i].getPosX();
-        float y = FaixasCentrais[i].getPosY();
-        float z = FaixasCentrais[i].getPosZ();
+        float x = VecFaixasCentrais[i].getPosX();
+        float y = VecFaixasCentrais[i].getPosY();
+        float z = VecFaixasCentrais[i].getPosZ();
         glTranslatef(x,y,z);
         glBegin(GL_QUADS);
             glColor3f(1,1,1);
@@ -220,11 +241,11 @@ void drawFaixaCentral(){
 void drawEnemyCars(){
     for (int i = 0; i < QtdCarrosInimigos; i++){
         glPushMatrix();
-        float x = EnemyCars[i].getPosX();
-        float y = EnemyCars[i].getPosY();
-        float z = EnemyCars[i].getPosZ();
+        float x = VecEnemyCars[i].getPosX();
+        float y = VecEnemyCars[i].getPosY();
+        float z = VecEnemyCars[i].getPosZ();
         glTranslatef(x,y,z);
-        EnemyCars[i].DrawAllCar(RotacaoPneu);
+        VecEnemyCars[i].DrawAllCar(RotacaoPneu);
         glPopMatrix();
     }
 }
@@ -236,17 +257,17 @@ void drawWorld(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //glFrustum(-4,4,-1,1,frustrum_min,40);
-    glFrustum(-4,4,-1,1,0.9,40);
+    glFrustum(-4,4,-1,1,0.9,60);
 
     glMatrixMode(GL_MODELVIEW);
     glViewport(0,0,1200,600);
-    //gluLookAt(PosXGlobalCamera, PosYGlobalCamera,PosZGlobalCamera, //posição da câmera
-    //          PosXGlobalCamera, PosYApontaCamera,PosZApontaCamera,//Posição inicial da camera, //para onde a câmera olha
-    //          0, 0, 1); //para onde o topo da câmera aponta
     glLoadIdentity();
-    gluLookAt(PosXGlobalCamera, 9,12, //posição da câmera
-              PosXGlobalCamera, PosYApontaCamera,10, //para onde a câmera olha
+    gluLookAt(PosXGlobalCamera, PosYGlobalCamera,PosZGlobalCamera, //posição da câmera
+              PosXApontaCamera, PosYApontaCamera,PosZApontaCamera,//Posição inicial da camera, //para onde a câmera olha
               0, 0, 1); //para onde o topo da câmera aponta
+    //gluLookAt(PosXGlobalCamera, 9,12, //posição da câmera
+    //          PosXGlobalCamera, PosYApontaCamera,10, //para onde a câmera olha
+    //          0, 0, 1); //para onde o topo da câmera aponta
 
     ObjetosEstaticos.EstaticObjects(TamTextX,TamTextY,textID[7]);
     
@@ -264,20 +285,20 @@ void drawWorld(){
 
     drawEnemyCars();
 
-    for (int i = 0; i < Arvores.size(); i++){
-        Arvores[i].DesenharArvore(textID[8],textID[9]);
+    for (int i = 0; i < VecArvores.size(); i++){
+        VecArvores[i].DesenharArvore(textID[8],textID[9]);
     }
 
-    for (int i = 0; i < Postes.size(); i++){
-        Postes[i].DesenharPoste(textID[9]);
+    for (int i = 0; i < VecPostes.size(); i++){
+        VecPostes[i].DesenharPoste(textID[9]);
     }
 
-    for (int i = 0; i < Nuvens.size(); i++){
-        Nuvens[i].DesenharNuvem();
+    for (int i = 0; i < VecNuvens.size(); i++){
+        VecNuvens[i].DesenharNuvem();
     }
 
-    for (int i = 0; i < FaixasLargada.size(); i++){
-        FaixasLargada[i].DesenharFaixa();
+    for (int i = 0; i < VecFaixasLargada.size(); i++){
+        VecFaixasLargada[i].DesenharFaixa();
     }
 
     if (Temporizador == 0){//Tela de Press "Start"
@@ -297,46 +318,14 @@ void drawWorld(){
             glTexCoord2f(0.0,1.0); glVertex3f(28,10,12.7);
         glEnd();
         glBindTexture(GL_TEXTURE_2D, 0);
-    }else if (Temporizador > 1 && Temporizador <= 30){//Contador "1"
-        glColor3f(1,0,0);
-        glBindTexture(GL_TEXTURE_2D, textID[1]);
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0,0.0); glVertex3f(29.7,10,12.2);
-            glTexCoord2f(1.0,0.0); glVertex3f(30.3,10,12.2);
-            glTexCoord2f(1.0,1.0); glVertex3f(30.3,10,12.4);
-            glTexCoord2f(0.0,1.0); glVertex3f(29.7,10,12.4);
-        glEnd();
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }else if (Temporizador > 30 && Temporizador <= 60){//Contador "2"
-        glColor3f(1,0,0);
-        glBindTexture(GL_TEXTURE_2D, textID[2]);
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0,0.0); glVertex3f(29.7,10,12.2);
-            glTexCoord2f(1.0,0.0); glVertex3f(30.3,10,12.2);
-            glTexCoord2f(1.0,1.0); glVertex3f(30.3,10,12.4);
-            glTexCoord2f(0.0,1.0); glVertex3f(29.7,10,12.4);
-        glEnd();
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }else if (Temporizador > 60 && Temporizador <= 90){//Contador "3"
-        glColor3f(1,0,0);
-        glBindTexture(GL_TEXTURE_2D, textID[3]);
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0,0.0); glVertex3f(29.7,10,12.2);
-            glTexCoord2f(1.0,0.0); glVertex3f(30.3,10,12.2);
-            glTexCoord2f(1.0,1.0); glVertex3f(30.3,10,12.4);
-            glTexCoord2f(0.0,1.0); glVertex3f(29.7,10,12.4);
-        glEnd();
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }else if (Temporizador > 90 && Temporizador <= 110){//"GO!"
-        glColor3f(1,0,0);
-        glBindTexture(GL_TEXTURE_2D, textID[4]);
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0,0.0); glVertex3f(29.7,10,12.2);
-            glTexCoord2f(1.0,0.0); glVertex3f(30.3,10,12.2);
-            glTexCoord2f(1.0,1.0); glVertex3f(30.3,10,12.4);
-            glTexCoord2f(0.0,1.0); glVertex3f(29.7,10,12.4);
-        glEnd();
-        glBindTexture(GL_TEXTURE_2D, 0);
+    }else if (Temporizador > 1 && Temporizador < 45){//Contador "1"
+        Semaphore.drawSemaphore(RotacaoSemaforo, textID[1]);
+    }else if (Temporizador >= 45 && Temporizador < 90){//Contador "2"
+        Semaphore.drawSemaphore(RotacaoSemaforo, textID[2]);
+    }else if (Temporizador >= 90 && Temporizador < 135){//Contador "3"
+        Semaphore.drawSemaphore(RotacaoSemaforo, textID[3]);
+    }else if (Temporizador >= 135 && Temporizador <= 180){//"GO!"
+        Semaphore.drawSemaphore(RotacaoSemaforo, textID[4]);
     }else if (Temporizador == -1){//"Perdeu"
         glColor3f(1,0,0);
         glBindTexture(GL_TEXTURE_2D, textID[5]);
@@ -358,7 +347,17 @@ void drawWorld(){
         glEnd();
         glBindTexture(GL_TEXTURE_2D, 0);
     }else if (Temporizador > 150){
-        glViewport(700,100,850,500);
+        GLuint aux_text = 0;
+        if (Nitro == 3){
+            aux_text = textID[11];
+        }else if (Nitro == 2){
+            aux_text = textID[12];
+        }else if (Nitro == 1){
+            aux_text = textID[13];
+        }else{
+            aux_text = textID[14];
+        }
+        glViewport(200,100,850,500);
         glColor3f(1,0,0);
         glBindTexture(GL_TEXTURE_2D, textID_vel[int(MyCar.getVelocidade())]);
         glBegin(GL_QUADS);
@@ -367,7 +366,28 @@ void drawWorld(){
             glTexCoord2f(1.0,1.0); glVertex3f(PosXGlobalCamera+0.8,10.03,13.01);
             glTexCoord2f(0.0,1.0); glVertex3f(PosXGlobalCamera-0.8,10.03,13.01);
         glEnd();
+        glBindTexture(GL_TEXTURE_2D, aux_text);
+        glBegin(GL_QUADS);
+            glTexCoord2f(0.0,0.0); glVertex3f(PosXGlobalCamera-1.8,10,12.45);
+            glTexCoord2f(1.0,0.0); glVertex3f(PosXGlobalCamera-0.8,10,12.45);
+            glTexCoord2f(1.0,1.0); glVertex3f(PosXGlobalCamera-0.8,10.03,13.01);
+            glTexCoord2f(0.0,1.0); glVertex3f(PosXGlobalCamera-1.8,10.03,13.01);
+        glEnd();
         glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    if(TempoNitro>0 and TempoNitro <= 90){
+        //Deixar a marca de pneu no chao ao usar o nitro **A ser feita**
+        if ((TempoNitro-1)%10 == 0){
+            /*
+            glBegin(GL_QUADS);
+                glTexCoord2f(0.0,0.0); glVertex3f(MyCar.getPosX(),MyCar.getPosY()+0.5,12.45);
+                glTexCoord2f(1.0,0.0); glVertex3f(MyCar.getPosX(),MyCar.getPosY(),12.45);
+                glTexCoord2f(1.0,1.0); glVertex3f(MyCar.getPosX()+0.1,MyCar.getPosY(),13.01);
+                glTexCoord2f(0.0,1.0); glVertex3f(MyCar.getPosX()+0.1,MyCar.getPosY()+0.5,13.01);
+            glEnd();
+            */
+        }
+
     }
    
     glutSwapBuffers();
@@ -379,27 +399,29 @@ void ocioso(int v){
         Temporizador ++;
     }
     //Movendo as nuvens de forma constante
-    for (int i = 0; i < Nuvens.size(); i ++){
-        float PosX = Nuvens[i].getPosX();
+    for (int i = 0; i < VecNuvens.size(); i ++){
+        float PosX = VecNuvens[i].getPosX();
         PosX -= MovimentacaoNuvem;
-        Nuvens[i].setPosX(PosX);
+        VecNuvens[i].setPosX(PosX);
     }
     if (Chegada > 300 && Temporizador != -1 && Temporizador != -2){
-        for (int i = 0; i < EnemyCars.size(); i++){
-            if (FaixasLargada[0].getPosY() <= EnemyCars[i].getPosY()){
+        for (int i = 0; i < VecEnemyCars.size(); i++){
+            if (VecFaixasLargada[0].getPosY() <= VecEnemyCars[i].getPosY()){
                 Temporizador = -1;
             }
         }
-        if (FaixasLargada[0].getPosY() <= MyCar.getPosY()){
+        if (VecFaixasLargada[0].getPosY() <= MyCar.getPosY()){
                 Temporizador = -2;
         }
         if (Temporizador == -1){
             PosXGlobalCamera = 30.0;
+            PosXApontaCamera = 30.0;
             glutTimerFunc(1000.0/FPS, ocioso, 0);
             glutPostRedisplay();
         }
         if (Temporizador == -2){
             PosXGlobalCamera = 30.0;
+            PosXApontaCamera = 30.0;
             glutTimerFunc(1000.0/FPS, ocioso, 0);
             glutPostRedisplay();
         }
@@ -407,14 +429,34 @@ void ocioso(int v){
     if (Temporizador == 0){
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
-    }else if (Temporizador > 1 && Temporizador <= 110){
+    }else if (Temporizador > 1 && Temporizador <= 45){
+        if (Temporizador > 30){
+            RotacaoSemaforo -= 6;
+        }
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
-    }else if (Temporizador > 110 && Temporizador <=150){
+    }else if (Temporizador > 45 && Temporizador <= 90){
+        if (Temporizador > 75){
+            RotacaoSemaforo -= 6;
+        }
+        glutTimerFunc(1000.0/FPS, ocioso, 0);
+        glutPostRedisplay();
+    }else if (Temporizador > 90 && Temporizador <= 135){
+        if (Temporizador > 120){
+            RotacaoSemaforo -= 6;
+        }
+        glutTimerFunc(1000.0/FPS, ocioso, 0);
+        glutPostRedisplay();
+    }else if (Temporizador > 135 && Temporizador <= 180){
+        glutTimerFunc(1000.0/FPS, ocioso, 0);
+        glutPostRedisplay();
+    }else if (Temporizador > 180 && Temporizador <=210){
         PosXGlobalCamera += (MyCar.getPosX() - PosXGlobalCamera)/10;
+        PosXApontaCamera += (MyCar.getPosX() - PosXApontaCamera)/10;
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
     }else if (Temporizador != -1 && Temporizador != -2){
+        //Definindo as coordenadas da textura do chão (indo de X-50 a 70, o mesmo para Y, para mudar a qtd da textura no chao, assim ela é replicada mantendo seu tamanho, e n sendo esticada se as coordenadas fossem 0 e 1 normal, que é o desejado)
         if(MyCar.getVelocidade() > 0){
             TamTextX += 0.5;
             TamTextY += 0.5;
@@ -431,6 +473,7 @@ void ocioso(int v){
 
         //Mantendo a posição da camera de acordo com a posição do meu carro
         PosXGlobalCamera = MyCar.getPosX() + 0.5;
+        PosXApontaCamera = MyCar.getPosX() + 0.5;
 
         if (Pressed_Key[0] == 1){
             //W
@@ -439,49 +482,40 @@ void ocioso(int v){
         if (Pressed_Key[1] == 1){
             //A
             MyCar.setPosX(MyCar.getPosX() - 0.07);
-            MyCar.DefineVelo(MyCar.getVelocidade() - 0.3);
+            MyCar.DefineVelo(MyCar.getVelocidade() - 0.7);
         }
         if (Pressed_Key[2] == 1){
             //S
-            MyCar.DefineVelo(MyCar.getVelocidade() - 4.0);
+            MyCar.DefineVelo(MyCar.getVelocidade() - 2.0);
         }
         if (Pressed_Key[3] == 1){
             //D
             MyCar.setPosX(MyCar.getPosX() + 0.07);
-            MyCar.DefineVelo(MyCar.getVelocidade() - 0.3);
+            MyCar.DefineVelo(MyCar.getVelocidade() - 0.7);
         }
         if (Pressed_Key[4] == 1){
             //D
             if (PosYApontaCamera > 0){
                 PosYApontaCamera = PosYApontaCamera*(-1.0);
-                frustrum_min = 0.2;
-                PosXGlobalCamera = PosXGlobalCamera-0.5;
-                PosYGlobalCamera = 12.30;
-                PosZGlobalCamera = 11;
-                PosZApontaCamera = 8;
             }
         }
         if (Pressed_Key[4] == 0){
             //D
             if (PosYApontaCamera < 0){
                 PosYApontaCamera = PosYApontaCamera*(-1.0);
-                frustrum_min = 0.9;
-                PosYGlobalCamera = 9.0;
-                PosZGlobalCamera = 12.0;
-                PosXGlobalCamera = MyCar.getPosX() + 0.5;
             }
         }
         
         //Determinar as posições finais das Faixas Centrais
         for (int i = 0; i < MaxFaixaCentral; i ++){
-            FaixasCentrais[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
-            FaixasCentrais[i].MoverFaixaCentral();
+            VecFaixasCentrais[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
+            VecFaixasCentrais[i].MoverFaixaCentral();
         }
 
         //Movendo os carros inimigos com suas velocidades fixas em relação a velocidade relativa ao meu carro
         for (int i = 0; i < QtdCarrosInimigos; i ++){
-            int veloFixa = EnemyCars[i].getVeloFixa();
-            float PosX = EnemyCars[i].getPosX();
+            int veloFixa = VecEnemyCars[i].getVeloFixa();
+            float PosX = VecEnemyCars[i].getPosX();
             float rand_aux = rand() % 1000;            
             if (rand_aux >= 60 && rand_aux <= 65){
                 VetorDir[i] = VetorDir[i]*(-1);
@@ -496,10 +530,10 @@ void ocioso(int v){
                 VetorDir[i] = VetorDir[i]*(-1);
                 PosX = 25.25;
             }
-            EnemyCars[i].setPosX(PosX);
-            EnemyCars[i].DefineVeloFixa(veloFixa);
-            EnemyCars[i].DefineVeloRelativa(MyCar.getVelocidade(),MaxVelocidade);
-            EnemyCars[i].MoveCar();
+            VecEnemyCars[i].setPosX(PosX);
+            VecEnemyCars[i].DefineVeloFixa(veloFixa);
+            VecEnemyCars[i].DefineVeloRelativa(MyCar.getVelocidade(),MaxVelocidade);
+            VecEnemyCars[i].MoveCar();
             
         }
 
@@ -510,8 +544,10 @@ void ocioso(int v){
             MyCar.setPosX(25.4);
         }else if(MyCar.getVelocidade() <= 0){
             MyCar.DefineVelo(0.0);
-        }else if(MyCar.getVelocidade() >= MaxVelocidade){
-            MyCar.DefineVelo(MaxVelocidade);
+        }else if(MyCar.getVelocidade() > MaxVelocidade){
+            if(MaxVelocidade == 240){
+                MyCar.DefineVelo(MaxVelocidade);
+            }            
         }
 
         //Fazendo a rotação dos pneus caso o carro esteja em movimento
@@ -523,21 +559,21 @@ void ocioso(int v){
         }
 
         //Movendo as árvores com velocidade relativa ao meu carro
-        for (int i = 0; i < Arvores.size(); i ++){
-            Arvores[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
-            Arvores[i].MoverObjetoOffPista();
+        for (int i = 0; i < VecArvores.size(); i ++){
+            VecArvores[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
+            VecArvores[i].MoverObjetoOffPista();
         }
 
         //Movendo os postes com velocidade relativa ao meu carro
-        for (int i = 0; i < Postes.size(); i ++){
-            Postes[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
-            Postes[i].MoverObjetoOffPista();
+        for (int i = 0; i < VecPostes.size(); i ++){
+            VecPostes[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
+            VecPostes[i].MoverObjetoOffPista();
         }
 
-        for (int i = 0; i < FaixasLargada.size(); i ++){
-            FaixasLargada[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
-            FaixasLargada[i].MoverFaixaChegada();
-            Chegada += FaixasLargada[i].getPosY()/FPS;
+        for (int i = 0; i < VecFaixasLargada.size(); i ++){
+            VecFaixasLargada[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
+            VecFaixasLargada[i].MoverFaixaChegada();
+            Chegada += VecFaixasLargada[i].getPosY()/FPS;
         }
         
         if (Colisao == 0){
@@ -546,11 +582,11 @@ void ocioso(int v){
             PosY = MyCar.getPosY();
             for (int i = 0; i < QtdCarrosInimigos; i ++){
                 float XsupDir,YsupDir,XinfEsq,YinfEsq;
-                XsupDir = EnemyCars[i].getPosX() + 1;//Canto superior direito
-                YsupDir = EnemyCars[i].getPosY() + 0.5;
+                XsupDir = VecEnemyCars[i].getPosX() + 1;//Canto superior direito
+                YsupDir = VecEnemyCars[i].getPosY() + 0.5;
 
-                XinfEsq = EnemyCars[i].getPosX();//Canto inferior esquerdo
-                YinfEsq = EnemyCars[i].getPosY();
+                XinfEsq = VecEnemyCars[i].getPosX();//Canto inferior esquerdo
+                YinfEsq = VecEnemyCars[i].getPosY();
 
                 if ((PosX + 1) >= XinfEsq && (PosX + 1) <= XsupDir && (PosY + 0.5) >= YinfEsq && (PosY + 0.5) <= YsupDir){
                     Colisao = 1;
@@ -565,15 +601,20 @@ void ocioso(int v){
         }
         if (Colisao == 1){
             if (RotacaoColisao == 0){
-                MyCar.DefineVelo(MyCar.getVelocidade() - 50);
+                MyCar.DefineVelo(MyCar.getVelocidade() - 100);
                 RotacaoColisao = 5;
                 if (MyCar.getVelocidade() <= 0){
                     MyCar.DefineVelo(0);
                 }
             }else{
-                MyCar.DefineVelo(MyCar.getVelocidade() - 0.5);
+                MyCar.DefineVelo(MyCar.getVelocidade() - 1);
                 if (MyCar.getVelocidade() <= 0){
                     MyCar.DefineVelo(0);
+                }
+                if(int(TempoColisao)%2==0){
+                    PosXGlobalCamera += 0.05;
+                }else{
+                    PosXGlobalCamera -= 0.05;
                 }
             }
             if (RotacaoColisao > 0){
@@ -586,6 +627,21 @@ void ocioso(int v){
                 RotacaoColisao = 0;
                 Colisao = 0;
                 TempoColisao = 0;
+            }
+        }
+        if (TempoNitro != 0 and Nitro>=0){
+            cout<<Nitro<<endl;
+            TempoNitro+=3;
+            if (TempoNitro <= 180){
+                MaxVelocidade = 270.0;
+                if (TempoNitro <= 90){
+                    MyCar.DefineVelo(MyCar.getVelocidade() + 1.5);
+                }else if(TempoNitro > 90 and TempoNitro <= 180){
+                    MyCar.DefineVelo(MyCar.getVelocidade() - 2.0);
+                }
+            }else{
+                TempoNitro = 0;
+                MaxVelocidade = 240;
             }
         }
         glutTimerFunc(1000.0/FPS, ocioso, 0);
@@ -612,6 +668,10 @@ void Key(unsigned char key, int x, int y){
     }
     if (key == 'm' || key == 'M'){
         Temporizador = 1;
+    }
+    if (key == 'f' || key == 'F'){
+        Nitro -= 1;
+        TempoNitro = 1;
     }
 }
 
