@@ -52,7 +52,7 @@ class Clouds{
             glPushMatrix();
             glTranslatef(this->PosX,this->PosY,this->PosZ);
             glScalef(10,10,6);
-            BoxForTexure(1,0,0);
+            BoxForTexure(1,1,1);
             glPopMatrix();
         }
 };

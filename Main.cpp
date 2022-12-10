@@ -182,7 +182,7 @@ void initializeGL(){
     glEnable(GL_BLEND);
 
     glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMPILE);
     glGenTextures(16, textID);//Gerando na memoria a textura com seu id
     carregaTextura(textID[0],"sprites/PressStart.jpeg");
     carregaTextura(textID[1],"sprites/1.png");
@@ -296,7 +296,7 @@ void drawWorld(){
             glVertex3f(32.75,10.05,12.92);
             glVertex3f(27.25,10.05,12.92);
         glEnd();
-        glColor3f(0,0,0);
+        glColor3f(1,1,1);
         glBindTexture(GL_TEXTURE_2D, textID[0]);
         glBegin(GL_QUADS);//(0,0)
             glTexCoord2f(0.0,0.0); glVertex3f(28,9.9,11.3);
@@ -314,7 +314,7 @@ void drawWorld(){
     }else if (Temporizador >= 135 && Temporizador <= 180){//"GO!"
         Semaphore.drawSemaphore(RotacaoSemaforo, textID[4]);
     }else if (Temporizador == -1){//"Perdeu"
-        glColor3f(1,0,0);
+        glColor3f(1,1,1);
         glBindTexture(GL_TEXTURE_2D, textID[5]);
         glBegin(GL_QUADS);
             glTexCoord2f(0.0,0.0); glVertex3f(27,10,11);
@@ -324,7 +324,7 @@ void drawWorld(){
         glEnd();
         glBindTexture(GL_TEXTURE_2D, 0);
     }else if (Temporizador == -2){//"Ganhou"
-        glColor3f(1,0,0);
+        glColor3f(1,1,1);
         glBindTexture(GL_TEXTURE_2D, textID[6]);
         glBegin(GL_QUADS);
             glTexCoord2f(0.0,0.0); glVertex3f(27,10,11);
@@ -345,7 +345,7 @@ void drawWorld(){
             aux_text = textID[14];
         }
         glViewport(200,100,850,500);
-        glColor3f(1,0,0);
+        glColor3f(1,1,1);
         glBindTexture(GL_TEXTURE_2D, textID_vel[int(MyCar.getVelocidade())]);
         glBegin(GL_QUADS);
             glTexCoord2f(0.0,0.0); glVertex3f(PosXGlobalCamera-0.8,10,12.45);

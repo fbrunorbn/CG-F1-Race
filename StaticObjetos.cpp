@@ -14,7 +14,7 @@ class StaticObjetos{
             //Chao        
             glPushMatrix();
             glBindTexture(GL_TEXTURE_2D, text_ID_Chao);
-            glColor3f(0,0.29,0.20);
+            glColor3f(1,1,1);
             glBegin(GL_QUADS);
                 glNormal3f(0.f, 0.f, 1.f);
                 glTexCoord2f(0.0,0.0);       glVertex3f(-60,-40,10);

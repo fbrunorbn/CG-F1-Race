@@ -98,11 +98,11 @@ class FaixaLargada{
         }
 
         void Faixa(GLfloat X, GLfloat Y, GLfloat Z, GLfloat lado, GLuint text_ID){
-            drawFilledTrunk(X,Y,Z,lado,5,0.5,0.5,0.5);
+            drawFilledTrunk(X,Y,Z,lado,5,1,1,1);
             Retangulo(5,1,1,1,text_ID);
             glPushMatrix();
             glTranslatef(50,0,0);
-            drawFilledTrunk(X,Y,Z,lado,5,0.5,0.5,0.5);
+            drawFilledTrunk(X,Y,Z,lado,5,1,1,1);
             glPopMatrix();
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 

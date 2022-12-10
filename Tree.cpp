@@ -157,7 +157,7 @@ class Tree{
 
         //Chamanda da função para a copa
         void copa(GLfloat X, GLfloat Y, GLfloat Z, GLfloat radius,GLuint text_ID_copa){
-            drawFilledCopa(X,Y,Z,radius,8,10,0,1,0,text_ID_copa);
+            drawFilledCopa(X,Y,Z,radius,8,10,1,1,1,text_ID_copa);
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             drawFilledCopa(X,Y,Z,radius,8,10,0,0,0,text_ID_copa);
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -165,7 +165,7 @@ class Tree{
 
         //Chamada da função para o tronco
         void caule(GLfloat X, GLfloat Y, GLfloat Z, GLfloat radius, GLuint text_ID_caule){
-            drawFilledCircle(0,0,0,0.5,4,-3,1,1,0, text_ID_caule);
+            drawFilledCircle(0,0,0,0.5,4,-3,1,1,1, text_ID_caule);
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             drawFilledCircle(0,0,0,0.5,4,-3,0,0,0, text_ID_caule);
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );

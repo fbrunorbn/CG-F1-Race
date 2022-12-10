@@ -120,7 +120,7 @@ class Post{
 
         //Chamada da função para desenhar o poste
         void Poste(GLfloat X, GLfloat Y, GLfloat Z, GLfloat lado, GLuint text_ID_Poste){
-            drawPoste(X,Y,Z,lado,5,0.33,0.33,0.33,text_ID_Poste);
+            drawPoste(X,Y,Z,lado,5,1,1,1,text_ID_Poste);
             drawLampada(X,Y,Z,5,1,1,0);
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             drawPoste(X,Y,Z,lado,5,0,0,0,text_ID_Poste);
