@@ -43,15 +43,16 @@ float Chegada = 0;
 float Colisao = 0;
 float RotacaoColisao = 0;
 float TempoColisao = 0;
-float TamTextX = 50;
-float TamTextY = 50;
+float TamTextX = 10;
+float TamTextY = 10;
 float frustrum_min = 0.9;
 int Nitro = 3;
 int TempoNitro = 0;
 GLuint textID[16];
 GLuint textID_vel[271];
 float PosYLuz = 40;
-Luz luz(glm::vec3(50,PosYLuz,40.5));
+//Luz luz(glm::vec3(50,PosYLuz,40.5));
+Luz luz(glm::vec3(50,40,40));
 
 PrimaryCar MyCar = PrimaryCar(32,11.5,10.11,0.0);
 StaticObjetos ObjetosEstaticos = StaticObjetos();
@@ -257,7 +258,7 @@ void drawWorld(){
     //          PosXGlobalCamera, PosYApontaCamera,10, //para onde a câmera olha
     //          0, 0, 1); //para onde o topo da câmera aponta
 
-    ObjetosEstaticos.EstaticObjects(TamTextX,TamTextY,textID[7]);
+    ObjetosEstaticos.EstaticObjects(TamTextX,TamTextY,textID[7],luz);
     
     glPushMatrix();
     glTranslatef(MyCar.getPosX()+0.5,MyCar.getPosY()+0.25,MyCar.getPosZ());
@@ -431,13 +432,13 @@ void ocioso(int v){
     }else if (Temporizador != -1 && Temporizador != -2){
         //Definindo as coordenadas da textura do chão (indo de X-50 a 70, o mesmo para Y, para mudar a qtd da textura no chao, assim ela é replicada mantendo seu tamanho, e n sendo esticada se as coordenadas fossem 0 e 1 normal, que é o desejado)
         if(MyCar.getVelocidade() > 0){
-            TamTextX += 0.5;
-            TamTextY += 0.5;
-            if (TamTextX >= 70){
-                TamTextX = 50;
+            TamTextX += 0.2;
+            TamTextY += 0.2;
+            if (TamTextX >= 20){
+                TamTextX = 10;
             }
-            if (TamTextY >= 70){
-                TamTextY = 50;
+            if (TamTextY >= 25){
+                TamTextY = 10;
             }
         }
         
@@ -451,8 +452,8 @@ void ocioso(int v){
         if (Pressed_Key[0] == 1){
             //W
             MyCar.DefineVelo(MyCar.getVelocidade() + 1.3);
-            PosYLuz -= 0.1;
-            luz.setPosicao(glm::vec3 (50,PosYLuz,30));
+            //PosYLuz -= 0.1;
+            //luz.setPosicao(glm::vec3 (50,PosYLuz,30));
         }
         if (Pressed_Key[1] == 1){
             //A

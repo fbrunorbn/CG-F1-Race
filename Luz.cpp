@@ -8,12 +8,14 @@ class Luz{
         glm::vec3 posicao;                     //Fonte de luz pontual
         glm::vec3 ambiente, difusa, especular; //Propriedades da fonte de luz
         glm::vec3 posicaoCamera;
+        glm::vec3 especularMaterial;
     public:
         Luz(glm::vec3 posicao){
             this->posicao = posicao;
-            ambiente  = glm::vec3(0.1); //valor baixo pra propriedade ambiente (senão a cena fica com pouco contraste)
-            difusa    = glm::vec3(0.9); //luz com propriedades difusa e especulares branca
+            ambiente  = glm::vec3(0.2); //valor baixo pra propriedade ambiente (senão a cena fica com pouco contraste)
+            difusa    = glm::vec3(1.0); //luz com propriedades difusa e especulares branca
             especular = glm::vec3(1.0);
+            especularMaterial = glm::vec3(0.0);
         }
 
         glm::vec3 getPosicao(){
@@ -40,6 +42,10 @@ class Luz{
             this->especular = glm::clamp(especular, glm::vec3(0), glm::vec3(1));
         }
 
+        void setEspecularMaterial(glm::vec3 especularMaterial){
+            this->especularMaterial = especularMaterial;
+        }
+
         glm::vec3 ilumina(glm::vec3 pos, glm::vec3 normal, glm::vec3 color){
             glm::vec3 Ia = this->ambiente;
             glm::vec3 Id = this->difusa;
@@ -48,7 +54,6 @@ class Luz{
             //calculando os vetores normal e vetor que aponta na direção da fonte de luz
             glm::vec3 N = glm::normalize(normal);
             glm::vec3 L = glm::normalize(posicao - pos);
-            glm::vec3 Control(1.0,1.0,1.0);
             glm::vec3 V = glm::normalize(posicaoCamera - pos);
             glm::vec3 R = 2*(glm::dot(N,L))*(N-L);
             float K = glm::dot(V,R);
@@ -61,18 +66,19 @@ class Luz{
             glm::vec3 Rd = glm::max(glm::dot(L,N),0.2f) * color; //usando 'color' como propriedade difusa do material
             float Rs;
             if (K < 0){
-                Rs = pow(0,64);
+                Rs = pow(0,16);
             }else{
-                Rs = pow(K,64);
+                Rs = pow(K,16);
             }
 
             //cada resultado deve ser multiplicado com as propriedades da fonte de luz correspondente
             glm::vec3 ambiente = Ia * Ra;
             glm::vec3 difusa   = Id * Rd;
-            glm::vec3 especular   = Is * Rs * glm::vec3(1);
+            //glm::vec3 especular   = Is * Rs * especularMaterial;
+            glm::vec3 especularR   = Is * Rs * especularMaterial;
 
             //cor final é a soma de todas as componentes (especular está ausente)
-            glm::vec3 corFinal = ambiente + difusa + especular;
+            glm::vec3 corFinal = ambiente + difusa + especularR;
 
             return corFinal;
         }

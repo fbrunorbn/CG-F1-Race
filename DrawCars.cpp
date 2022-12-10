@@ -84,6 +84,7 @@ class DrawCars{
             glm::vec3 P,C;
             glm::vec3 cor = glm::vec3(R,G,B);
             glColor3f(cor.r, cor.g, cor.b);
+            luz.setEspecularMaterial(glm::vec3(0.5));
 
             glBegin(GL_QUADS);
                 //Cima
