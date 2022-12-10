@@ -85,19 +85,21 @@ class FaixaLargada{
             glEnd();
         }
 
-        void Retangulo(GLfloat Z, GLfloat R, GLfloat G, GLfloat B){
+        void Retangulo(GLfloat Z, GLfloat R, GLfloat G, GLfloat B, GLuint text_ID){
             glColor3f(R,G,B);
+            glBindTexture(GL_TEXTURE_2D, text_ID);
             glBegin(GL_QUADS);
-                glVertex3f(0,0,Z);
-                glVertex3f(0,0,Z-1);
-                glVertex3f(50,0,Z-1);
-                glVertex3f(50,0,Z);
+                glTexCoord2f(0.0,0.0); glVertex3f(0,0,Z-1);
+                glTexCoord2f(1.0,0.0); glVertex3f(50,0,Z-1);
+                glTexCoord2f(1.0,1.0); glVertex3f(50,0,Z);
+                glTexCoord2f(0.0,1.0); glVertex3f(0,0,Z);
             glEnd();
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        void Faixa(GLfloat X, GLfloat Y, GLfloat Z, GLfloat lado){
+        void Faixa(GLfloat X, GLfloat Y, GLfloat Z, GLfloat lado, GLuint text_ID){
             drawFilledTrunk(X,Y,Z,lado,5,0.5,0.5,0.5);
-            Retangulo(5,1,1,1);
+            Retangulo(5,1,1,1,text_ID);
             glPushMatrix();
             glTranslatef(50,0,0);
             drawFilledTrunk(X,Y,Z,lado,5,0.5,0.5,0.5);
@@ -105,7 +107,7 @@ class FaixaLargada{
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
             drawFilledTrunk(X,Y,Z,lado,5,0,0,0);
-            Retangulo(5,0,0,0);
+            Retangulo(5,0,0,0,text_ID);
             glPushMatrix();
             glTranslatef(50,0,0);
             drawFilledTrunk(X,Y,Z,lado,5,0,0,0);
@@ -114,11 +116,11 @@ class FaixaLargada{
         }
 
         //Desenha o poste no 0,0,0 e translada para a posição desejada
-        void DesenharFaixa(){
+        void DesenharFaixa(GLuint text_ID){
             glPushMatrix();
             glTranslatef(this->PosX,this->PosY,this->PosZ-2.5);
             glScalef(0.2,0.1,1);
-            Faixa(0,0,0,0.1);
+            Faixa(0,0,0,0.1,text_ID);
             glPopMatrix();
         }
 };

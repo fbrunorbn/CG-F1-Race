@@ -1,13 +1,10 @@
-//Aluno: Francisco Bruno Rebouças do Nascimento
-//Matrícula: 479278
-//Curso: Ciência da Computação
-//Cadeira: Computação Gráfica
-
 #include <GL/glut.h>
 #include <GL/glu.h>
 #include <GL/gl.h>
 #include <math.h>
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 #include "FaixaCentral.cpp"
 #include "Tree.cpp"
 #include "FaixaLargada.cpp"
@@ -21,6 +18,7 @@
 #include <cstdlib>
 #include <math.h>
 #include "stb_image.cpp"
+#include "Luz.cpp"
 
 #define FPS 30 //Limite de FPS no jogo
 #define MaxFaixaCentral 20 //Quantidade máxima de faixas centrais
@@ -50,8 +48,10 @@ float TamTextY = 50;
 float frustrum_min = 0.9;
 int Nitro = 3;
 int TempoNitro = 0;
-GLuint textID[15];
+GLuint textID[16];
 GLuint textID_vel[271];
+float PosYLuz = 40;
+Luz luz(glm::vec3(50,PosYLuz,40.5));
 
 PrimaryCar MyCar = PrimaryCar(32,11.5,10.11,0.0);
 StaticObjetos ObjetosEstaticos = StaticObjetos();
@@ -119,7 +119,7 @@ void criarArvores(){
 
 //Instanciando as postes em quantidade fixa
 void criarPoste(){
-    for (int i = -30; i <= 40 ; i+= 11){
+    for (int i = -20; i <= 40 ; i+= 40){
         Post Poste = Post(24,i,11);
         VecPostes.push_back(Poste);
     }
@@ -154,16 +154,16 @@ void criarEnemyCar(){
 
 //Instanciando as nuvens em quantidade fixa
 void criarNuvem(){
-    for (int i = 0; i <= 20; i++){
-        int x = i *24;
+    for (int i = 0; i <= 5; i++){
+        int x = i *90;
         int z = 0;
         if(i%2==0){
-            z = (rand() % 35) + 11;
+            z = (rand() % 20) + 25;
         }else{
             z = rand() % 35;
         }
         
-        Clouds Nuvem = Clouds(x,60,z,textID[10]);
+        Clouds Nuvem = Clouds(x,40,z,textID[10]);
         VecNuvens.push_back(Nuvem);
     }
 }
@@ -183,7 +183,7 @@ void initializeGL(){
 
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glGenTextures(15, textID);//Gerando na memoria a textura com seu id
+    glGenTextures(16, textID);//Gerando na memoria a textura com seu id
     carregaTextura(textID[0],"sprites/PressStart.jpeg");
     carregaTextura(textID[1],"sprites/1.png");
     carregaTextura(textID[2],"sprites/2.png");
@@ -199,6 +199,7 @@ void initializeGL(){
     carregaTextura(textID[12],"sprites/Nitro-2.png");
     carregaTextura(textID[13],"sprites/Nitro-1.png");
     carregaTextura(textID[14],"sprites/Nitro-0.png");
+    carregaTextura(textID[15],"sprites/Largada.png");
 
 
     glGenTextures(271, textID_vel);//Gerando na memoria a textura da velocidade com seu id
@@ -221,19 +222,7 @@ void initializeGL(){
 //Funcao para desenhar as faixas centrais na posicao 0,0,0
 void drawFaixaCentral(){
     for (int i = 0; i < MaxFaixaCentral; i++){
-        glPushMatrix();
-        float x = VecFaixasCentrais[i].getPosX();
-        float y = VecFaixasCentrais[i].getPosY();
-        float z = VecFaixasCentrais[i].getPosZ();
-        glTranslatef(x,y,z);
-        glBegin(GL_QUADS);
-            glColor3f(1,1,1);
-            glVertex3f(-0.25,-1,0);
-            glVertex3f(0.25,-1,0);
-            glVertex3f(0.25,1,0);
-            glVertex3f(-0.25,1,0);
-        glEnd();
-        glPopMatrix();
+        VecFaixasCentrais[i].drawFaixaCentral();
     }
 }
 
@@ -245,7 +234,7 @@ void drawEnemyCars(){
         float y = VecEnemyCars[i].getPosY();
         float z = VecEnemyCars[i].getPosZ();
         glTranslatef(x,y,z);
-        VecEnemyCars[i].DrawAllCar(RotacaoPneu);
+        VecEnemyCars[i].DrawAllCar(RotacaoPneu,luz);
         glPopMatrix();
     }
 }
@@ -256,8 +245,7 @@ void drawWorld(){
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    //glFrustum(-4,4,-1,1,frustrum_min,40);
-    glFrustum(-4,4,-1,1,0.9,60);
+    glFrustum(-4,4,-1,1,0.9,40);
 
     glMatrixMode(GL_MODELVIEW);
     glViewport(0,0,1200,600);
@@ -271,14 +259,13 @@ void drawWorld(){
 
     ObjetosEstaticos.EstaticObjects(TamTextX,TamTextY,textID[7]);
     
-    
     glPushMatrix();
     glTranslatef(MyCar.getPosX()+0.5,MyCar.getPosY()+0.25,MyCar.getPosZ());
     if (Colisao == 1){
         glRotatef(RotacaoColisao,0,0,1);
     }
     glTranslatef(-0.5,-0.25,0);
-    MyCar.DrawAllCar(RotacaoPneu);
+    MyCar.DrawAllCar(RotacaoPneu,luz);
     glPopMatrix();
 
     drawFaixaCentral();
@@ -298,7 +285,7 @@ void drawWorld(){
     }
 
     for (int i = 0; i < VecFaixasLargada.size(); i++){
-        VecFaixasLargada[i].DesenharFaixa();
+        VecFaixasLargada[i].DesenharFaixa(textID[15]);
     }
 
     if (Temporizador == 0){//Tela de Press "Start"
@@ -375,21 +362,7 @@ void drawWorld(){
         glEnd();
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    if(TempoNitro>0 and TempoNitro <= 90){
-        //Deixar a marca de pneu no chao ao usar o nitro **A ser feita**
-        if ((TempoNitro-1)%10 == 0){
-            /*
-            glBegin(GL_QUADS);
-                glTexCoord2f(0.0,0.0); glVertex3f(MyCar.getPosX(),MyCar.getPosY()+0.5,12.45);
-                glTexCoord2f(1.0,0.0); glVertex3f(MyCar.getPosX(),MyCar.getPosY(),12.45);
-                glTexCoord2f(1.0,1.0); glVertex3f(MyCar.getPosX()+0.1,MyCar.getPosY(),13.01);
-                glTexCoord2f(0.0,1.0); glVertex3f(MyCar.getPosX()+0.1,MyCar.getPosY()+0.5,13.01);
-            glEnd();
-            */
-        }
-
-    }
-   
+ 
     glutSwapBuffers();
 }
 
@@ -478,6 +451,8 @@ void ocioso(int v){
         if (Pressed_Key[0] == 1){
             //W
             MyCar.DefineVelo(MyCar.getVelocidade() + 1.3);
+            PosYLuz -= 0.1;
+            luz.setPosicao(glm::vec3 (50,PosYLuz,30));
         }
         if (Pressed_Key[1] == 1){
             //A
@@ -630,7 +605,6 @@ void ocioso(int v){
             }
         }
         if (TempoNitro != 0 and Nitro>=0){
-            cout<<Nitro<<endl;
             TempoNitro+=3;
             if (TempoNitro <= 180){
                 MaxVelocidade = 270.0;
@@ -644,6 +618,9 @@ void ocioso(int v){
                 MaxVelocidade = 240;
             }
         }
+        glm::vec3 PosCamera(PosXGlobalCamera, PosYGlobalCamera,PosZGlobalCamera);
+        luz.setPosicaoCamera(PosCamera);
+
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
     }

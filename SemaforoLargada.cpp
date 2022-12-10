@@ -69,7 +69,7 @@ class SemaforoLargada{
             glTranslatef(this->PosX, this->PosY, this->PosZ);
             glRotatef(RotacaoSemaforo,0,0,1);
             glScalef(2,2,1.5);
-            Cube(1,0,0,text_ID);
+            Cube(1,1,1,text_ID);
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             Cube(0,0,0,text_ID);
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );

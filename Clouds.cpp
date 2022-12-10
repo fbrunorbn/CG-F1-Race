@@ -51,7 +51,7 @@ class Clouds{
         void DesenharNuvem(){
             glPushMatrix();
             glTranslatef(this->PosX,this->PosY,this->PosZ);
-            glScalef(4,4,4);
+            glScalef(10,10,6);
             BoxForTexure(1,0,0);
             glPopMatrix();
         }

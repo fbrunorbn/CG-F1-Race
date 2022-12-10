@@ -42,4 +42,19 @@ class FaixaCentral{
         float getPosZ(){
             return PosZ;
         }
+
+        float drawFaixaCentral(){
+
+            glPushMatrix();
+            glTranslatef(this->PosX,this->PosY,this->PosZ);
+            glColor3f(1,1,1);
+            glBegin(GL_QUADS);
+                glNormal3f(0.f, 0.f, 1.f);
+                glVertex3f(-0.25,-1,0);
+                glVertex3f(0.25,-1,0);
+                glVertex3f(0.25,1,0);
+                glVertex3f(-0.25,1,0);
+            glEnd();
+            glPopMatrix();
+        }
 };

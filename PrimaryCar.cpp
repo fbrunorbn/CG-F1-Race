@@ -1,5 +1,6 @@
 #include <iostream>
 #include "DrawCars.cpp"
+#include "Luz.cpp"
 
 using namespace std;
 
@@ -55,13 +56,13 @@ class PrimaryCar{
             this->PosZ = PosZ;
         }
 
-        void DrawAllCar(float RotacaoPneu){
+        void DrawAllCar(float RotacaoPneu, Luz &luz){
             DrawCars Car = DrawCars(RotacaoPneu);
             
-            Car.drawCar(1,0,0);
-            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            Car.drawCar(0,0,0);
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+            Car.drawCar(1,0,0,luz,PosX,PosY,PosZ);
+            //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            //Car.drawCar(0,0,0,luz,PosX,PosY,PosZ);
+            //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
             Car.drawPneus(-0.15,0.352,0.115);
             Car.drawPneus(-0.15,0.122,0.115);
         }
