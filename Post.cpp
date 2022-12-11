@@ -3,6 +3,9 @@
 #include <GL/glu.h>
 #include <GL/gl.h>
 #include <math.h>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include "Luz.cpp"
 
 using namespace std;
 
@@ -63,27 +66,101 @@ class Post{
         }
 
         //Base do poste
-        void drawPoste(GLfloat x, GLfloat y, GLfloat z, GLfloat lado, GLfloat altura,GLfloat R, GLfloat G, GLfloat B,GLuint text_ID_Poste){
-            glColor3f(R,G,B);
-            glBegin(GL_QUADS);
-                glVertex3f(0.5, 0.5, z);
-                glVertex3f(-0.5, 0.5, z);
-                glVertex3f(-0.5, -0.5, z);
-                glVertex3f(0.5, -0.5, z);
-            glEnd();
+        void drawPoste(GLfloat x, GLfloat y, GLfloat z, GLfloat lado, GLfloat altura,GLfloat R, GLfloat G, GLfloat B,GLuint text_ID_Poste,Luz &luz){
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL);
+            glm::vec3 P,C;
+            glm::vec3 cor = glm::vec3(R,G,B);
+            glColor3f(cor.r, cor.g, cor.b);
             glBindTexture(GL_TEXTURE_2D, text_ID_Poste);
-
             glBegin(GL_QUAD_STRIP);
-                glTexCoord2f(0.0,0.0); glVertex3f(0.5, 0.5, z);
-                glTexCoord2f(0.0,3.0); glVertex3f(0.5, 0.5, altura);
+                P = glm::vec3(-0.5 + PosX, -0.5 +PosY, z+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(0.0,0.0); glVertex3f(-0.5, -0.5, z);
+
+                P = glm::vec3(0.5 + PosX, -0.5 +PosY, z+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(1.0,0.0); glVertex3f(0.5, -0.5, z);
+
+                P = glm::vec3(0.5 + PosX, -0.5 +PosY, altura+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(1.0,4.0); glVertex3f(0.5, -0.5, altura);
+
+                P = glm::vec3(-0.5 + PosX, -0.5 +PosY, altura+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(0.0,4.0); glVertex3f(-0.5, -0.5, altura);
+
+                P = glm::vec3(-0.5 + PosX, -0.5 +PosY, z+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(0.0,0.0); glVertex3f(-0.5, -0.5, z);
+
+                P = glm::vec3(-0.5 + PosX, 0.5 +PosY, z+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(1.0,0.0); glVertex3f(-0.5, 0.5, z);
+
+                P = glm::vec3(-0.5 + PosX, 0.5 +PosY, altura+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(1.0,4.0); glVertex3f(-0.5, 0.5, altura);
+
+                P = glm::vec3(-0.5 + PosX, -0.5 +PosY, altura+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(0.0,4.0); glVertex3f(-0.5, -0.5, altura);
+
+                P = glm::vec3(0.5 + PosX, -0.5 +PosY, z+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(0.0,0.0); glVertex3f(0.5, -0.5, z);
+
+                P = glm::vec3(0.5 + PosX, 0.5 +PosY, z+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(1.0,0.0); glVertex3f(0.5, 0.5, z);
+
+                P = glm::vec3(0.5 + PosX, 0.5 +PosY, altura+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(1.0,4.0); glVertex3f(0.5, 0.5, altura);
+
+                P = glm::vec3(0.5 + PosX, -0.5 +PosY, altura+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(0.0,4.0); glVertex3f(0.5, -0.5, altura);
+
+                P = glm::vec3(-0.5 + PosX, 0.5 +PosY, z+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(0.0,0.0); glVertex3f(-0.5, 0.5, z);
+
+                P = glm::vec3(0.5 + PosX, 0.5 +PosY, z+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(1.0,0.0); glVertex3f(0.5, 0.5, z);
+
+                P = glm::vec3(0.5 + PosX, 0.5 +PosY, altura+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(1.0,4.0); glVertex3f(0.5, 0.5, altura);
+
+                P = glm::vec3(-0.5 + PosX, 0.5 +PosY, altura+PosZ);
+                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                glColor3f(C.r, C.g, C.b); 
+                glTexCoord2f(0.0,4.0); glVertex3f(-0.5, 0.5, altura);
+                /*
                 glVertex3f(-0.5, 0.5, z);
                 glVertex3f(-0.5, 0.5, altura);
                 glVertex3f(-0.5, -0.5, z);
                 glVertex3f(-0.5, -0.5, altura);
-                glTexCoord2f(3.0,0.0); glVertex3f(0.5, -0.5, z);
-                glTexCoord2f(3.0,3.0); glVertex3f(0.5, -0.5, altura);
+                glVertex3f(0.5, -0.5, z);
+                glVertex3f(0.5, -0.5, altura);
                 glVertex3f(0.5, 0.5, z);
-                glVertex3f(0.5, 0.5, altura);
+                glVertex3f(0.5, 0.5, altura);*/
             glEnd();
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -119,21 +196,21 @@ class Post{
         }
 
         //Chamada da função para desenhar o poste
-        void Poste(GLfloat X, GLfloat Y, GLfloat Z, GLfloat lado, GLuint text_ID_Poste){
-            drawPoste(X,Y,Z,lado,5,1,1,1,text_ID_Poste);
+        void Poste(GLfloat X, GLfloat Y, GLfloat Z, GLfloat lado, GLuint text_ID_Poste ,Luz &luz){
+            drawPoste(X,Y,Z,lado,5,1,1,1,text_ID_Poste,luz);
             drawLampada(X,Y,Z,5,1,1,0);
-            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            drawPoste(X,Y,Z,lado,5,0,0,0,text_ID_Poste);
-            drawLampada(X,Y,Z,5,0,0,0);
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+            //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            //drawPoste(X,Y,Z,lado,5,0,0,0,text_ID_Poste);
+            //drawLampada(X,Y,Z,5,0,0,0);
+            //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         }
 
         //Desenha o poste no 0,0,0 e translada para a posição desejada
-        void DesenharPoste(GLuint text_ID_Poste){
+        void DesenharPoste(GLuint text_ID_Poste,Luz &luz){
             glPushMatrix();
             glTranslatef(this->PosX,this->PosY,this->PosZ-2.5);
             glScalef(0.2,0.05,1);
-            Poste(0,0,0,0.1,text_ID_Poste);
+            Poste(0,0,0,0.1,text_ID_Poste,luz);
             glPopMatrix();
         }
 };

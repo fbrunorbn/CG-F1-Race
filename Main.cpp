@@ -223,7 +223,7 @@ void initializeGL(){
 //Funcao para desenhar as faixas centrais na posicao 0,0,0
 void drawFaixaCentral(){
     for (int i = 0; i < MaxFaixaCentral; i++){
-        VecFaixasCentrais[i].drawFaixaCentral();
+        VecFaixasCentrais[i].drawFaixaCentral(luz);
     }
 }
 
@@ -274,11 +274,11 @@ void drawWorld(){
     drawEnemyCars();
 
     for (int i = 0; i < VecArvores.size(); i++){
-        VecArvores[i].DesenharArvore(textID[8],textID[9]);
+        VecArvores[i].DesenharArvore(textID[8],textID[9],luz);
     }
 
     for (int i = 0; i < VecPostes.size(); i++){
-        VecPostes[i].DesenharPoste(textID[9]);
+        VecPostes[i].DesenharPoste(textID[9],luz);
     }
 
     for (int i = 0; i < VecNuvens.size(); i++){

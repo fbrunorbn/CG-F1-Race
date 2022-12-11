@@ -12,7 +12,7 @@ class Luz{
     public:
         Luz(glm::vec3 posicao){
             this->posicao = posicao;
-            ambiente  = glm::vec3(0.2); //valor baixo pra propriedade ambiente (senão a cena fica com pouco contraste)
+            ambiente  = glm::vec3(0.3); //valor baixo pra propriedade ambiente (senão a cena fica com pouco contraste)
             difusa    = glm::vec3(1.0); //luz com propriedades difusa e especulares branca
             especular = glm::vec3(1.0);
             especularMaterial = glm::vec3(0.0);
@@ -83,5 +83,11 @@ class Luz{
             return corFinal;
         }
 
+        glm::vec3 calculoNormal(glm::vec3 point1,glm::vec3 point2, glm::vec3 point3){
+            glm::vec3 V1 = point2 - point1;
+            glm::vec3 V2 = point3 - point1;
+            glm::vec3 Normal = glm::cross(V2,V1);
+            return Normal;
+        }
 
 };
