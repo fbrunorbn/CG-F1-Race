@@ -57,9 +57,6 @@ class Luz{
             glm::vec3 V = glm::normalize(posicaoCamera - pos);
             glm::vec3 R = 2*(glm::dot(N,L))*(N-L);
             float K = glm::dot(V,R);
-            
-            //glm::vec3 R = glm::normalize(glm::dot(L,N));
-            //glm::vec3 R = glm::normalize(2*(glm::dot(L,N))*(N-L));
 
             //calculando os componentes ambiente, difuso e especular de Phong (especular ausente)
             glm::vec3 Ra = glm::vec3(0.2);
@@ -74,7 +71,6 @@ class Luz{
             //cada resultado deve ser multiplicado com as propriedades da fonte de luz correspondente
             glm::vec3 ambiente = Ia * Ra;
             glm::vec3 difusa   = Id * Rd;
-            //glm::vec3 especular   = Is * Rs * especularMaterial;
             glm::vec3 especularR   = Is * Rs * especularMaterial;
 
             //cor final é a soma de todas as componentes (especular está ausente)
