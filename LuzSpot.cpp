@@ -94,8 +94,8 @@ class LuzSpot{//Classe para determinar a iluminação dos objetos determinados
 
         //Determinando se o ponto vai ser iluminado ou não pela fonte de luz spot
         int calculoDefPointSpot(glm::vec3 point1){
-            glm::vec3 l = posicao - point1;
-            glm::vec3 d = posicaoApontaLuz - posicao;
+            glm::vec3 l = posicao - point1;//Posição da fonte de luz menos a posicao do vertice
+            glm::vec3 d = posicaoApontaLuz - posicao;//Posicao que a luz aponta menos a posicao da fonte de luz
             l = glm::normalize(l);
             d = glm::normalize(d);
             float resultado = (glm::dot(l,d))*(-1);

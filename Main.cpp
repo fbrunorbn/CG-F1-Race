@@ -1,3 +1,11 @@
+//Curso: Ciência da computação
+//Cadeira: Computação Gráfica - 2022
+//Trabalho 2 - F1 Race
+//Alunos:
+//Anne Caroline da Silva Rocha - 470124
+//Anne Mikaelly Barreto de Abreu - 404805
+//Francisco Bruno Rebouças do Nascimento - 479278
+
 #include <GL/glut.h>
 #include <GL/glu.h>
 #include <GL/gl.h>
