@@ -9,7 +9,7 @@
 
 using namespace std;
 
-//Classe para instanciar os multiplos objetos utilizados nos vetores
+//Classe para instanciar a faixa de largada, e após passar uma vez pelo carro inimigo, se tornar a faixa de chegada
 class FaixaLargada{
     private:
         float PosX;
@@ -26,7 +26,7 @@ class FaixaLargada{
             this->velocidade = 0.0; //Tem velocidade 0, seu movimento se dá somente em relação a velocidade relativa ao meu carro
         }
 
-        //Definindo a velocidade do objeto
+        //Definindo a velocidade do objeto em relação a velocidade do meu carro
         void DefineVelo(float velocidade, float MaxVelo){
             this->velocidade = velocidade/(MaxVelo*2);
         }
@@ -38,7 +38,7 @@ class FaixaLargada{
                 PosY += 80.0;
             }
         }
-
+        //Ao passar pela primeira vez pelo carro, ela vai para a posição +600, assim tendo que fazer os carros percorrerem 600 para cruzar a faixa de chagada
         void MoverFaixaChegada(){
             this->PosY -= this->velocidade;
             if (PosY <= -40.0){
@@ -50,13 +50,6 @@ class FaixaLargada{
             return this->PosX;
         }
 
-        void setPosX(float X){
-            if (X <= -100.0){
-                X += 250.0;
-            }
-            this->PosX = X;
-        }
-
         float getPosY(){
             return PosY;
         }
@@ -65,7 +58,7 @@ class FaixaLargada{
             return PosZ;
         }
         
-        //Base do poste
+        //Base do apoio da faixa
         void drawFilledTrunk(GLfloat x, GLfloat y, GLfloat z, GLfloat lado, GLfloat altura,GLfloat R, GLfloat G, GLfloat B){
             glColor3f(R,G,B);
             glBegin(GL_QUADS);
@@ -88,6 +81,7 @@ class FaixaLargada{
             glEnd();
         }
 
+        //Desenha o retangulo para a textura da largada
         void Retangulo(GLfloat Z, GLfloat R, GLfloat G, GLfloat B, GLuint text_ID){
             glColor3f(R,G,B);
             glBindTexture(GL_TEXTURE_2D, text_ID);
@@ -100,6 +94,7 @@ class FaixaLargada{
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
+        //Chamada para o desenho completo da largada
         void Faixa(GLfloat X, GLfloat Y, GLfloat Z, GLfloat lado, GLuint text_ID){
             drawFilledTrunk(X,Y,Z,lado,5,1,1,1);
             Retangulo(5,1,1,1,text_ID);
@@ -118,7 +113,7 @@ class FaixaLargada{
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         }
 
-        //Desenha o poste no 0,0,0 e translada para a posição desejada
+        //Desenha a faixa de largada no 0,0,0 e translada para a posição desejada
         void DesenharFaixa(GLuint text_ID){
             glPushMatrix();
             glTranslatef(this->PosX,this->PosY,this->PosZ-2.5);

@@ -10,12 +10,13 @@
 
 using namespace std;
 
-//Classe para instanciar cada um dos carros inimigos
+//Classe para desenhar os carros, tanto inimigos quando o principal
 class DrawCars{
     private:
         float RotacaoPneu;
 
     public:
+        //Inicia só com a variavel que vai indicar o quando o pneu vai ser rotacionado
         DrawCars(float RotacaoPneu){
             this->RotacaoPneu = RotacaoPneu;
         }
@@ -80,15 +81,15 @@ class DrawCars{
             glPopMatrix();
         }
 
-        //Função para desenhar o carro na posicao 0,0,0
+        //Função para desenhar o carro na posicao 0,0,0, e determinar a iluminação em cada vertice de cada face
         void drawCar(int R, int G, int B, Luz &luz, float PosX, float PosY, float PosZ){
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL);
-            glm::vec3 P,C;
+            glm::vec3 P,C;//P vai guardar o ponto a ser iluminado e C a cor desse ponto
             glm::vec3 cor = glm::vec3(R,G,B);
             glColor3f(cor.r, cor.g, cor.b);
-            luz.setEspecularMaterial(glm::vec3(0.5));
+            luz.setEspecularMaterial(glm::vec3(0.5));//Cara elemento terá a sua propriedade especular
 
-            glBegin(GL_QUADS);
+            glBegin(GL_QUADS);//Desenhando as faces do carro
                 //Cima
                 P = glm::vec3((0.0+PosX),(0.0+PosY),(0.4,PosZ));
                 C = luz.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);

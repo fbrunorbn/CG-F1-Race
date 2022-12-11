@@ -4,7 +4,7 @@
 
 using namespace std;
 
-//Classe para instanciar cada um dos carros inimigos
+//Classe para instanciar o carro principal
 class PrimaryCar{
     private:
         float PosX;
@@ -17,14 +17,17 @@ class PrimaryCar{
             this->PosX = PosX;
             this->PosY = PosY;
             this->PosZ = PosZ;
-            this->Velocidade = velocidade;//Tem velocidade 100, seu movimento se dá relação a velocidade relativa ao meu carro, onde caso a velocidade do carro inimigo seja maior vai se afastar, e caso seja menor, vai se aproximar
+            this->Velocidade = velocidade;//Determina a velocidade do meu carro
         }
 
-        //Funções para definir a velocidade realtiva do carro inimigo
+        //Função para ajudar a limitar a velocidade total
         void DefineVelo(float velocidade){
             this->Velocidade = velocidade;
             if (this->Velocidade > 270){
                 this->Velocidade = 270.0;
+            }
+            if (this->Velocidade <= 0.0){
+                this->Velocidade = 0.0;
             }
         }
 
@@ -56,13 +59,10 @@ class PrimaryCar{
             this->PosZ = PosZ;
         }
 
+        //Chamada da função para desenhar o carro completo
         void DrawAllCar(float RotacaoPneu, Luz &luz){
             DrawCars Car = DrawCars(RotacaoPneu);
-            
             Car.drawCar(1,0,0,luz,PosX,PosY,PosZ);
-            //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            //Car.drawCar(0,0,0,luz,PosX,PosY,PosZ);
-            //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
             Car.drawPneus(-0.15,0.352,0.115);
             Car.drawPneus(-0.15,0.122,0.115);
         }

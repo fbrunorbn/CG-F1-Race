@@ -7,7 +7,7 @@
 
 using namespace std;
 
-//Classe para instanciar cada um dos carros inimigos
+//Classe para instanciar o semafóro que conterá as texturas "3"-"2"-"1"-"GO"
 class SemaforoLargada{
     private:
         float PosX;
@@ -22,6 +22,7 @@ class SemaforoLargada{
             this->PosZ = PosZ;
         }
 
+        //Desenha o cubo com sua textura para o semaforo
         void Cube(GLfloat X, GLfloat Y, GLfloat Z,GLuint text_ID){
             glColor3f(X,Y,Z);
             glBindTexture(GL_TEXTURE_2D, text_ID);
@@ -64,6 +65,7 @@ class SemaforoLargada{
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
+        //É desenhando o semaforo no 0,0,0, rotacionado para mostrar a textura de frente para a camera, e transladado para sua posição acima dos carros
         void drawSemaphore(float RotacaoSemaforo, GLuint text_ID){
             glPushMatrix();
             glTranslatef(this->PosX, this->PosY, this->PosZ);

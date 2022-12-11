@@ -5,7 +5,7 @@
 
 using namespace std;
 
-//Classe para instanciar cada uma das faixas centrais
+//Classe para instanciar cada uma das faixas centrais que se movem
 class FaixaCentral{
     private:
         float PosX;
@@ -21,12 +21,12 @@ class FaixaCentral{
             this->velocidade = 0.0;//Tem velocidade 0, seu movimento se dá somente em relação a velocidade relativa ao meu carro
         }
 
-        //Funções para definir a velocidade relativa das faixas centrais
+        //Funções para definir a velocidade relativa das faixas centrais, com a velocidade do carro principal
         void DefineVelo(float velocidade, float MaxVelo){
             this->velocidade = velocidade/MaxVelo;
         }
 
-        //Função para mover as faixas para suas posições corretas
+        //Função para mover as faixas para suas posições corretas, a partir da movimentação do carro principal
         void MoverFaixaCentral(){
             this->PosY -= this->velocidade;
             if (PosY <= -40.0){
@@ -46,13 +46,13 @@ class FaixaCentral{
             return PosZ;
         }
 
+        //Desenha as faixas centrais
         float drawFaixaCentral(Luz &luz){
-            
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL);
             glm::vec3 P,C;
             glm::vec3 cor = glm::vec3(1,1,1);
             glColor3f(cor.r, cor.g, cor.b);
-            luz.setEspecularMaterial(glm::vec3(0.2));
+            luz.setEspecularMaterial(glm::vec3(0.2));//Elas são brancas, porém com baixo especular, para ter pouco reflexo
             glPushMatrix();
             glTranslatef(this->PosX,this->PosY,this->PosZ);
             glColor3f(1,1,1);

@@ -6,16 +6,16 @@
 
 using namespace std;
 
-//Classe para instanciar os multiplos objetos utilizados nos vetores
+//Classe para instanciar as nuvens de fundo
 class Clouds{
     private:
         float PosX;
         float PosY;
         float PosZ;
-        float velocidade;
         GLuint textID;
 
     public:
+        //Inicia as nuvens em suas posições e com sua textura
         Clouds(float PosX, float PosY, float PosZ, GLuint text_ID){
             this->PosX = PosX;
             this->PosY = PosY;
@@ -35,6 +35,7 @@ class Clouds{
             this->PosX = X;
         }
 
+        //Desenhando a nuvens com a textura
         void BoxForTexure(GLfloat R, GLfloat G, GLfloat B){
             glColor3f(R,G,B);
             glBindTexture(GL_TEXTURE_2D, this->textID);
@@ -47,7 +48,7 @@ class Clouds{
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        //Desenha as nuvens no 0,0,0 e translada
+        //Desenha as nuvens no 0,0,0 e translada e escalona
         void DesenharNuvem(){
             glPushMatrix();
             glTranslatef(this->PosX,this->PosY,this->PosZ);

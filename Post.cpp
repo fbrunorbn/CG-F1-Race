@@ -9,7 +9,7 @@
 
 using namespace std;
 
-//Classe para instanciar os multiplos objetos utilizados nos vetores
+//Classe para instanciar os postes
 class Post{
     private:
         float PosX;
@@ -39,22 +39,8 @@ class Post{
             }
         }
 
-        void MoverFaixaChegada(){
-            this->PosY -= this->velocidade;
-            if (PosY <= -40.0){
-                PosY += 640.0;
-            }
-        }
-
         float getPosX(){
             return this->PosX;
-        }
-
-        void setPosX(float X){
-            if (X <= -100.0){
-                X += 250.0;
-            }
-            this->PosX = X;
         }
 
         float getPosY(){
@@ -152,15 +138,6 @@ class Post{
                 C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
                 glColor3f(C.r, C.g, C.b); 
                 glTexCoord2f(0.0,4.0); glVertex3f(-0.5, 0.5, altura);
-                /*
-                glVertex3f(-0.5, 0.5, z);
-                glVertex3f(-0.5, 0.5, altura);
-                glVertex3f(-0.5, -0.5, z);
-                glVertex3f(-0.5, -0.5, altura);
-                glVertex3f(0.5, -0.5, z);
-                glVertex3f(0.5, -0.5, altura);
-                glVertex3f(0.5, 0.5, z);
-                glVertex3f(0.5, 0.5, altura);*/
             glEnd();
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -195,14 +172,10 @@ class Post{
             glEnd();
         }
 
-        //Chamada da função para desenhar o poste
+        //Chamada da função para desenhar o poste completo
         void Poste(GLfloat X, GLfloat Y, GLfloat Z, GLfloat lado, GLuint text_ID_Poste ,Luz &luz){
             drawPoste(X,Y,Z,lado,5,1,1,1,text_ID_Poste,luz);
             drawLampada(X,Y,Z,5,1,1,0);
-            //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            //drawPoste(X,Y,Z,lado,5,0,0,0,text_ID_Poste);
-            //drawLampada(X,Y,Z,5,0,0,0);
-            //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         }
 
         //Desenha o poste no 0,0,0 e translada para a posição desejada

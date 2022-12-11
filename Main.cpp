@@ -95,7 +95,7 @@ void criarFaixasCentrais(){
 //Instanciando as arvores em quantidade fixa
 void criarArvores(){
     for (int i = -40; i < 40 ; i+= 3){        
-        for (int ladoEsq = -30; ladoEsq <= 22; ladoEsq += 4){
+        for (int ladoEsq = -31; ladoEsq <= 21; ladoEsq += 4){
             int tree_aleat_pos = rand() % 5;
             Tree Arvore = Tree(ladoEsq,tree_aleat_pos + i,11);
             VecArvores.push_back(Arvore);
@@ -155,7 +155,7 @@ void criarNuvem(){
         }else{
             z = rand() % 35;
         }
-        Clouds Nuvem = Clouds(x,40,z,textID[10]);
+        Clouds Nuvem = Clouds(x,50,z,textID[10]);
         VecNuvens.push_back(Nuvem);
     }
 }
@@ -238,7 +238,7 @@ void drawWorld(){
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-4,4,-1,1,0.9,40);
+    glFrustum(-4,4,-1,1,0.9,50);
 
     glMatrixMode(GL_MODELVIEW);
     glViewport(0,0,1200,600);
@@ -266,22 +266,27 @@ void drawWorld(){
     //Desenhar os inimigos
     drawEnemyCars();
 
+    //Desenhar as arvores
     for (int i = 0; i < VecArvores.size(); i++){
         VecArvores[i].DesenharArvore(textID[8],textID[9],luz);
     }
 
+    //Desenhar os postes
     for (int i = 0; i < VecPostes.size(); i++){
         VecPostes[i].DesenharPoste(textID[9],luz);
     }
 
+    //Desenhar as nuvens
     for (int i = 0; i < VecNuvens.size(); i++){
         VecNuvens[i].DesenharNuvem();
     }
 
+    //Desenhar a faixa de largada e consequente chegada
     for (int i = 0; i < VecFaixasLargada.size(); i++){
         VecFaixasLargada[i].DesenharFaixa(textID[15]);
     }
 
+    //Verificando os "estado do jogo"(tela de menu, contagem antes de iniciar a corrida, inicio da corrida, e chegada)
     if (Temporizador == 0){//Tela de "Press Start"
         glColor3f(0.8,0.1,0.5);
         glBegin(GL_QUADS);
@@ -425,6 +430,9 @@ void ocioso(int v){
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
     }else if (Temporizador != -1 && Temporizador != -2){
+
+        //ANNE MIKAELLY ********************************************
+
         //Definindo as coordenadas da textura do chão (indo de X-10 a 725, o mesmo para Y, para mudar a qtd da textura no chao, assim ela é replicada mantendo seu tamanho, e n sendo esticada se as coordenadas fossem 0 e 1 normal, que é o desejado)
         if(MyCar.getVelocidade() > 0){
             TamTextX += 0.2;
@@ -482,6 +490,27 @@ void ocioso(int v){
             VecFaixasCentrais[i].MoverFaixaCentral();
         }
 
+        //Movendo as árvores com velocidade relativa ao meu carro
+        for (int i = 0; i < VecArvores.size(); i ++){
+            VecArvores[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
+            VecArvores[i].MoverObjetoOffPista();
+        }
+
+        //Movendo os postes com velocidade relativa ao meu carro
+        for (int i = 0; i < VecPostes.size(); i ++){
+            VecPostes[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
+            VecPostes[i].MoverObjetoOffPista();
+        }
+
+        //ANNE CAROLINNE ********************************************
+
+        //Move a feixa de largada com velocidade relativa ao meu carro
+        for (int i = 0; i < VecFaixasLargada.size(); i ++){
+            VecFaixasLargada[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
+            VecFaixasLargada[i].MoverFaixaChegada();
+            Chegada += VecFaixasLargada[i].getPosY()/FPS;//Verifica a distancia percorrida pela faixa
+        }
+
         //Movendo os carros inimigos com suas velocidades fixas em relação a velocidade relativa ao meu carro
         for (int i = 0; i < QtdCarrosInimigos; i ++){
             int veloFixa = VecEnemyCars[i].getVeloFixa();
@@ -529,26 +558,9 @@ void ocioso(int v){
         if (RotacaoPneu >= 360){
             RotacaoPneu = 0;
         }
-
-        //Movendo as árvores com velocidade relativa ao meu carro
-        for (int i = 0; i < VecArvores.size(); i ++){
-            VecArvores[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
-            VecArvores[i].MoverObjetoOffPista();
-        }
-
-        //Movendo os postes com velocidade relativa ao meu carro
-        for (int i = 0; i < VecPostes.size(); i ++){
-            VecPostes[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
-            VecPostes[i].MoverObjetoOffPista();
-        }
-
-        //Move a feixa de largada com velocidade relativa ao meu carro
-        for (int i = 0; i < VecFaixasLargada.size(); i ++){
-            VecFaixasLargada[i].DefineVelo(MyCar.getVelocidade(),MaxVelocidade);
-            VecFaixasLargada[i].MoverFaixaChegada();
-            Chegada += VecFaixasLargada[i].getPosY()/FPS;//Verifica a distancia percorrida pela faixa
-        }
         
+        //FRANCISCO BRUNO ********************************************
+
         //Tratamento de colisão, onde verifica se meu carro colidiu com algum dos outros carros inimigos
         if (Colisao == 0){
             float PosX, PosY;

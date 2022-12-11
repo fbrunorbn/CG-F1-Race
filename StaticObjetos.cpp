@@ -9,7 +9,7 @@
 
 using namespace std;
 
-//Classe para instanciar os multiplos objetos utilizados nos vetores
+//Classe para instanciar os objetos que serão estáticos na cena
 class StaticObjetos{
     public:
         //Desenhando os elementos estáticos, que no caso é o piso, chão, linhas laterais
@@ -21,8 +21,8 @@ class StaticObjetos{
             glBindTexture(GL_TEXTURE_2D, text_ID_Chao);
             glm::vec3 cor = glm::vec3(1,1,1);
             glColor3f(cor.r, cor.g, cor.b);
-            luz.setEspecularMaterial(glm::vec3(0.2));
-            for(float x = -60; x<120; x+=20){
+            luz.setEspecularMaterial(glm::vec3(0.2));//Tem novamente uma especular baixa para ter pouca reflexão
+            for(float x = -60; x<120; x+=20){//Quadrado grande divido em muitos para ter uma maior qtd de vertices
                 for (float y = -40; y < 60; y+=20){
                     glBegin(GL_QUADS);
                         P = glm::vec3((x),(y),(10));
@@ -58,8 +58,8 @@ class StaticObjetos{
             glPushMatrix();
             cor = glm::vec3(0,0,0);
             glColor3f(cor.r, cor.g, cor.b);
-            luz.setEspecularMaterial(glm::vec3(0.05));
-            for(float x = 25; x<35; x+=1){
+            luz.setEspecularMaterial(glm::vec3(0.05));//Queremos aqui uma reflexão quase nula, pois é a pista
+            for(float x = 25; x<35; x+=1){//Quadrado grande divido em muitos para ter uma maior qtd de vertices
                 for (float y = -40; y < 60; y+=1){
                     glBegin(GL_QUADS);
                         P = glm::vec3((x),(y),(10.03));
@@ -91,7 +91,7 @@ class StaticObjetos{
             cor = glm::vec3(1,1,1);
             glColor3f(cor.r, cor.g, cor.b);
             luz.setEspecularMaterial(glm::vec3(0.5));
-            for(float x = 25; x<25.5; x+=0.25){
+            for(float x = 25; x<25.5; x+=0.25){//Retangulo grande divido em muitos para ter uma maior qtd de vertices
                 for (float y = -40; y < 60; y+=1){
                     glBegin(GL_QUADS);
                         P = glm::vec3((x),(y),(10.05));
@@ -122,7 +122,7 @@ class StaticObjetos{
             cor = glm::vec3(1,1,1);
             glColor3f(cor.r, cor.g, cor.b);
             luz.setEspecularMaterial(glm::vec3(0.05));
-            for(float x = 34.5; x<35; x+=0.25){
+            for(float x = 34.5; x<35; x+=0.25){//Retangulo grande divido em muitos para ter uma maior qtd de vertices
                 for (float y = -40; y < 60; y+=1){
                     glBegin(GL_QUADS);
                         P = glm::vec3((x),(y),(10.05));

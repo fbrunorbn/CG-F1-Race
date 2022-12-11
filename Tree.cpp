@@ -9,7 +9,7 @@
 
 using namespace std;
 
-//Classe para instanciar os multiplos objetos utilizados nos vetores
+//Classe para instanciar as arvores
 class Tree{
     private:
         float PosX;
@@ -43,13 +43,6 @@ class Tree{
             return this->PosX;
         }
 
-        void setPosX(float X){
-            if (X <= -100.0){
-                X += 250.0;
-            }
-            this->PosX = X;
-        }
-
         float getPosY(){
             return PosY;
         }
@@ -71,7 +64,7 @@ class Tree{
             
             GLfloat twicePi = 2.0f * M_PI;
             glBindTexture(GL_TEXTURE_2D, text_ID_copa);
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//Desenhando primeiro a base da "piramide", e determinando sua iluminação e textura
                 glColor3f(R,G,B);
                 glTexCoord2f(0.5,2); glVertex3f(x, y, z);
                 P = glm::vec3(x,y,z);
@@ -109,7 +102,7 @@ class Tree{
             
             //Lateral da copa
             glBindTexture(GL_TEXTURE_2D, text_ID_copa);
-            glBegin(GL_TRIANGLE_FAN);
+            glBegin(GL_TRIANGLE_FAN);//Desenhando primeiro a lateral vista da "piramide", e determinando sua iluminação e textura, para cade vertice
                 glColor3f(R,G,B);
                 glTexCoord2f(0.5,1); glVertex3f(x, y, altura);
                 glm::vec3 point1 = glm::vec3(x,y,altura);
@@ -124,7 +117,7 @@ class Tree{
                         (y + (radius * sin((i+1) * twicePi / triangleAmount))),
                         z
                     );
-                    glm::vec3 Normal = luz.calculoNormal(point1,point2,point3);
+                    glm::vec3 Normal = luz.calculoNormal(point1,point2,point3);//Por ser um plano inclinado, precisa da normal
 
                     P = glm::vec3(
                         x + (radius * cos(i *  twicePi / triangleAmount)), 
@@ -157,7 +150,7 @@ class Tree{
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        //Desenhando o tronco das árvores
+        //Desenhando o tronco das árvores, com um "circulo" de 4 quatro lados 
         void drawFilledCircle(GLfloat x, GLfloat y, GLfloat z, GLfloat radius, GLfloat faces, GLfloat altura, GLint R, GLint G, GLint B, GLuint text_ID_caule, Luz &luz){
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL);
             glm::vec3 P,C;
@@ -170,7 +163,7 @@ class Tree{
             glBindTexture(GL_TEXTURE_2D, text_ID_caule);
             glBegin(GL_QUAD_STRIP);
                 for(int i = 0; i <= QtdFaces;i++) {
-                    //Pegando a normal
+                    //Pegando a normal,pois mesmo que não seja inclinado na vertical, não é "linheiro" com os eixos
                     glm::vec3 point1 = glm::vec3(
                     (x + (radius * cos(i *  twicePi / QtdFaces))), 
                     (y + (radius * sin(i * twicePi / QtdFaces))),
@@ -246,7 +239,7 @@ class Tree{
             drawFilledCircle(0,0,0,0.5,4,-3,1,1,1, text_ID_caule, luz);
         }
 
-        //Desenha as arvores no 0,0,0 e as translada para suas posições corretas
+        //Desenha as arvores no 0,0,0 e as escalonas e translada para suas posições corretas
         void DesenharArvore(GLuint text_ID_copa, GLuint text_ID_caule, Luz &luz){
             glPushMatrix();
             glTranslatef(this->PosX,this->PosY,this->PosZ);
