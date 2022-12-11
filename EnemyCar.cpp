@@ -1,6 +1,7 @@
 #include <iostream>
 #include "DrawCars.cpp"
 #include "Luz.cpp"
+#include "LuzSpot.cpp"
 
 using namespace std;
 
@@ -66,9 +67,9 @@ class EnemyCar{
         }
 
         //Comando para desenhar os carros
-        void DrawAllCar(float RotacaoPneu, Luz &luz){
+        void DrawAllCar(float RotacaoPneu, Luz &luz, LuzSpot &luzSpot){
             DrawCars Car = DrawCars(RotacaoPneu);
-            Car.drawCar(0,1,0,luz,PosX,PosY,PosZ);
+            Car.drawCar(0,1,0,luz,PosX,PosY,PosZ,luzSpot);
             Car.drawPneus(-0.15,0.352,0.115);
             Car.drawPneus(-0.15,0.122,0.115);
         }

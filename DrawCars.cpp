@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include "Luz.cpp"
+#include "LuzSpot.cpp"
 #pragma once
 
 using namespace std;
@@ -82,54 +83,95 @@ class DrawCars{
         }
 
         //Função para desenhar o carro na posicao 0,0,0, e determinar a iluminação em cada vertice de cada face
-        void drawCar(int R, int G, int B, Luz &luz, float PosX, float PosY, float PosZ){
+        void drawCar(int R, int G, int B, Luz &luz, float PosX, float PosY, float PosZ, LuzSpot &luzSpot){
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL);
             glm::vec3 P,C;//P vai guardar o ponto a ser iluminado e C a cor desse ponto
             glm::vec3 cor = glm::vec3(R,G,B);
             glColor3f(cor.r, cor.g, cor.b);
             luz.setEspecularMaterial(glm::vec3(0.5));//Cara elemento terá a sua propriedade especular
+            luzSpot.setDifusaMaterial(glm::vec3(0.8,0.8,0.0));
 
             glBegin(GL_QUADS);//Desenhando as faces do carro
                 //Cima
                 P = glm::vec3((0.0+PosX),(0.0+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                int resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0.0,0.0,0.4);
 
                 P = glm::vec3((1+PosX),(0+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0,0.4);
 
                 P = glm::vec3((1+PosX),(0.5+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0.5,0.4);
 
                 P = glm::vec3((0.0+PosX),(0.5+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,0.0,1.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0,0.5,0.4);
             glEnd();
             glBegin(GL_QUADS);
                 //Atras
                 P = glm::vec3((0.0+PosX),(0.0+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0.0,0.0,0.0);
 
                 P = glm::vec3((1.0+PosX),(0.0+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1.0,0.0,0.0);
                 
                 P = glm::vec3((1+PosX),(0.0+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1.0,0.0,0.4);
 
                 P = glm::vec3((0.0+PosX),(0.0+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,-1.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0.0,0.0,0.4);
 
@@ -138,88 +180,168 @@ class DrawCars{
             glBegin(GL_QUADS);
                 //Baixo
                 P = glm::vec3((0.0+PosX),(0.0+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0,0,0);
 
                 P = glm::vec3((1+PosX),(0+PosY),(0,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0,0);
 
                 P = glm::vec3((1+PosX),(0.5+PosY),(0,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0.5,0);
 
                 P = glm::vec3((0.0+PosX),(0.5+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,0.0,-1.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0,0.5,0);
             glEnd();
             glBegin(GL_QUADS);
                 //Frente
                 P = glm::vec3((0.0+PosX),(0.5+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0,0.5,0);
 
                 P = glm::vec3((1.0+PosX),(0.5+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0.5,0);
 
                 P = glm::vec3((1.0+PosX),(0.5+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0.5,0.4);
 
                 P = glm::vec3((0.0+PosX),(0.5+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(0.0,1.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0,0.5,0.4);
             glEnd();
             glBegin(GL_QUADS);
                 //Esquerda
                 P = glm::vec3((0.0+PosX),(0.0+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0,0,0);
 
                 P = glm::vec3((0.0+PosX),(0.0+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0,0,0.4);
 
                 P = glm::vec3((0.0+PosX),(0.5+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0,0.5,0.4);
                 
                 P = glm::vec3((0.0+PosX),(0.5+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(-1.0,0.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(0,0.5,0);
             glEnd();
             glBegin(GL_QUADS);
                 //Direita
                 P = glm::vec3((1.0+PosX),(0.0+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0,0);
 
                 P = glm::vec3((1.0+PosX),(0.0+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0,0.4);
 
                 P = glm::vec3((1.0+PosX),(0.5+PosY),(0.4,PosZ));
-                C = luz.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0.5,0.4);
 
                 P = glm::vec3((1.0+PosX),(0.5+PosY),(0.0,PosZ));
-                C = luz.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                resultado = luzSpot.calculoDefPointSpot(P);
+                if(resultado == 0){
+                    C = luzSpot.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                }else{
+                    C = luz.ilumina(P,glm::vec3(1.0,0.0,0.0),cor);
+                }
                 glColor3f(C.r, C.g, C.b);
                 glVertex3f(1,0.5,0);
             glEnd();

@@ -1,6 +1,7 @@
 #include <iostream>
 #include "DrawCars.cpp"
 #include "Luz.cpp"
+#include "LuzSpot.cpp"
 
 using namespace std;
 
@@ -60,9 +61,9 @@ class PrimaryCar{
         }
 
         //Chamada da função para desenhar o carro completo
-        void DrawAllCar(float RotacaoPneu, Luz &luz){
+        void DrawAllCar(float RotacaoPneu, Luz &luz, LuzSpot &luzSpot){
             DrawCars Car = DrawCars(RotacaoPneu);
-            Car.drawCar(1,0,0,luz,PosX,PosY,PosZ);
+            Car.drawCar(1,0,0,luz,PosX,PosY,PosZ,luzSpot);
             Car.drawPneus(-0.15,0.352,0.115);
             Car.drawPneus(-0.15,0.122,0.115);
         }

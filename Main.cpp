@@ -19,9 +19,10 @@
 #include <math.h>
 #include "stb_image.cpp"
 #include "Luz.cpp"
+#include "LuzSpot.cpp"
 
 #define FPS 30 //Limite de FPS no jogo
-#define MaxFaixaCentral 20 //Quantidade máxima de faixas centrais
+#define MaxFaixaCentral 25 //Quantidade máxima de faixas centrais
 #define MovimentacaoNuvem  0.5; //Serve para a translação das nuvens
 
 using namespace std;
@@ -50,6 +51,7 @@ int TempoNitro = 0; //Tempo de estado de aceleração
 GLuint textID[16]; //Vetor dos sprites
 GLuint textID_vel[271]; //Vetor dos sprites do velocimetro
 Luz luz(glm::vec3(50,40,40)); //Posição da luz
+LuzSpot luzSpot(glm::vec3(24,20,11)); //Posição da luz
 
 //Inicializações de tudo que vai ficar pra "sempre" no mapa
 PrimaryCar MyCar = PrimaryCar(32,11.5,10.11,0.0); //Criação do carro principal
@@ -84,7 +86,7 @@ void carregaTextura(GLuint tex_id, string filePath){
 
 //Instanciando as faixas centrais em quantidade fixa
 void criarFaixasCentrais(){
-    float distY = 40.0;
+    float distY = 60.0;
     for (int i = -40; i<MaxFaixaCentral; i++){
         FaixaCentral Faixa = FaixaCentral(30.0,distY,10.05);
         VecFaixasCentrais.push_back(Faixa);
@@ -110,10 +112,8 @@ void criarArvores(){
 
 //Instanciando as postes em quantidade fixa
 void criarPoste(){
-    for (int i = -20; i <= 40 ; i+= 40){
-        Post Poste = Post(24,i,11);
-        VecPostes.push_back(Poste);
-    }
+    Post Poste = Post(24,20,11);
+    VecPostes.push_back(Poste);
 }
 
 //Instanciando os inimigos em faixa aleatoria da pista, e de forma dinâmica
@@ -153,7 +153,7 @@ void criarNuvem(){
         if(i%2==0){
             z = (rand() % 20) + 25;
         }else{
-            z = rand() % 35;
+            z = rand() % 35 + 25;
         }
         Clouds Nuvem = Clouds(x,50,z,textID[10]);
         VecNuvens.push_back(Nuvem);
@@ -215,7 +215,7 @@ void initializeGL(){
 //Funcao para desenhar as faixas centrais na posicao 0,0,0
 void drawFaixaCentral(){
     for (int i = 0; i < MaxFaixaCentral; i++){
-        VecFaixasCentrais[i].drawFaixaCentral(luz);
+        VecFaixasCentrais[i].drawFaixaCentral(luz,luzSpot);
     }
 }
 
@@ -227,7 +227,7 @@ void drawEnemyCars(){
         float y = VecEnemyCars[i].getPosY();
         float z = VecEnemyCars[i].getPosZ();
         glTranslatef(x,y,z);
-        VecEnemyCars[i].DrawAllCar(RotacaoPneu,luz);
+        VecEnemyCars[i].DrawAllCar(RotacaoPneu,luz,luzSpot);
         glPopMatrix();
     }
 }
@@ -241,13 +241,13 @@ void drawWorld(){
     glFrustum(-4,4,-1,1,0.9,50);
 
     glMatrixMode(GL_MODELVIEW);
-    glViewport(0,0,1200,600);
+    glViewport(0,0,1800,900);
     glLoadIdentity();
     gluLookAt(PosXGlobalCamera, PosYGlobalCamera,PosZGlobalCamera, //posição da câmera
               PosXApontaCamera, PosYApontaCamera,PosZApontaCamera,//Posição inicial da camera, //para onde a câmera olha
               0, 0, 1); //para onde o topo da câmera aponta
 
-    ObjetosEstaticos.EstaticObjects(TamTextX,TamTextY,textID[7],luz);
+    ObjetosEstaticos.EstaticObjects(TamTextX,TamTextY,textID[7],luz,luzSpot);
     
     //Desenhar meu carro
     glPushMatrix();
@@ -257,7 +257,7 @@ void drawWorld(){
         glRotatef(RotacaoColisao,0,0,1);
     }
     glTranslatef(-0.5,-0.25,0);
-    MyCar.DrawAllCar(RotacaoPneu,luz);
+    MyCar.DrawAllCar(RotacaoPneu,luz,luzSpot);
     glPopMatrix();
 
     //Desenhar as 20 faixas centrais
@@ -343,21 +343,21 @@ void drawWorld(){
         }else{
             aux_text = textID[14];
         }
-        glViewport(200,100,850,500);
+        //glViewport(200,100,850,500);
         glColor3f(1,1,1);
         glBindTexture(GL_TEXTURE_2D, textID_vel[int(MyCar.getVelocidade())]);
         glBegin(GL_QUADS);
-            glTexCoord2f(0.0,0.0); glVertex3f(PosXGlobalCamera-0.8,10,12.45);
+            glTexCoord2f(0.0,0.0); glVertex3f(PosXGlobalCamera-0.5,10,12.45);
             glTexCoord2f(1.0,0.0); glVertex3f(PosXGlobalCamera+0.8,10,12.45);
             glTexCoord2f(1.0,1.0); glVertex3f(PosXGlobalCamera+0.8,10.03,13.01);
-            glTexCoord2f(0.0,1.0); glVertex3f(PosXGlobalCamera-0.8,10.03,13.01);
+            glTexCoord2f(0.0,1.0); glVertex3f(PosXGlobalCamera-0.5,10.03,13.01);
         glEnd();
         glBindTexture(GL_TEXTURE_2D, aux_text);
         glBegin(GL_QUADS);
-            glTexCoord2f(0.0,0.0); glVertex3f(PosXGlobalCamera-1.8,10,12.45);
-            glTexCoord2f(1.0,0.0); glVertex3f(PosXGlobalCamera-0.8,10,12.45);
-            glTexCoord2f(1.0,1.0); glVertex3f(PosXGlobalCamera-0.8,10.03,13.01);
-            glTexCoord2f(0.0,1.0); glVertex3f(PosXGlobalCamera-1.8,10.03,13.01);
+            glTexCoord2f(0.0,0.0); glVertex3f(PosXGlobalCamera-1.5,10,12.45);
+            glTexCoord2f(1.0,0.0); glVertex3f(PosXGlobalCamera-0.5,10,12.45);
+            glTexCoord2f(1.0,1.0); glVertex3f(PosXGlobalCamera-0.5,10.03,13.01);
+            glTexCoord2f(0.0,1.0); glVertex3f(PosXGlobalCamera-1.5,10.03,13.01);
         glEnd();
         glBindTexture(GL_TEXTURE_2D, 0);
     }
@@ -437,10 +437,10 @@ void ocioso(int v){
         if(MyCar.getVelocidade() > 0){
             TamTextX += 0.2;
             TamTextY += 0.2;
-            if (TamTextX >= 25){
+            if (TamTextX >= 15){
                 TamTextX = 10;
             }
-            if (TamTextY >= 25){
+            if (TamTextY >= 15){
                 TamTextY = 10;
             }
         }
@@ -636,6 +636,13 @@ void ocioso(int v){
         glm::vec3 PosCamera(PosXGlobalCamera, PosYGlobalCamera,PosZGlobalCamera);
         luz.setPosicaoCamera(PosCamera);
 
+        //LuzSpot
+        luzSpot.setPosicaoCamera(PosCamera);
+        glm::vec3 PosLuzSpot(VecPostes[0].getPosX(),VecPostes[0].getPosY(),(VecPostes[0].getPosZ()+5));
+        luzSpot.setPosicao(PosLuzSpot);
+        glm::vec3 PosLuzAponta(VecPostes[0].getPosX()+5,VecPostes[0].getPosY(),(VecPostes[0].getPosZ()-5));
+        luzSpot.setPosicaoAponta(PosLuzAponta);
+
         glutTimerFunc(1000.0/FPS, ocioso, 0);
         glutPostRedisplay();
     }
@@ -690,7 +697,7 @@ int main(int argc, char **argv){
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(50,50);
-    glutInitWindowSize(1200,600);
+    glutInitWindowSize(1800,900);
     glutCreateWindow("F1 Race");
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
